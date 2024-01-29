@@ -2,11 +2,10 @@ package bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.bookmarks;
 
 import bg.sofia.uni.fmi.mjt.project.bookmarks.exceptions.UnknownCommand;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.Response;
-import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.CommandBase;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.CommandType;
 
-public class AddCommand extends BookmarkCommand {
-    public AddCommand(CommandType command, String[] arguments, String sessionId) {
+public class AddBookmarkCommand extends BookmarkCommand {
+    public AddBookmarkCommand(CommandType command, String[] arguments, String sessionId) {
         super(command, arguments, sessionId);
     }
 

@@ -1,30 +1,22 @@
 package bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command;
 
-import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.bookmarks.AddCommand;
+import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.bookmarks.AddBookmarkCommand;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.bookmarks.AddGroupCommand;
+import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.bookmarks.RemoveBookmarkCommand;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.user.LoginCommand;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.user.LogoutCommand;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.user.RegisterCommand;
 
 public class CommandFactory {
     public static Command of(CommandType command, String[] arguments, String sessionId) {
-        switch (command) {
-            case REGISTER:
-                return new RegisterCommand(command, arguments, sessionId);
-            case LOGIN:
-                return new LoginCommand(command, arguments, sessionId);
-            case LOGOUT:
-                return new LogoutCommand(command, arguments, sessionId);
-            case NEW_GROUP:
-                return new AddGroupCommand(command, arguments, sessionId);
-            case ADD:
-                return new AddCommand(command, arguments, sessionId);
-//            case "get-bookmarks":
-//                return new GetBookmarksCommand(command, arguments);
-//            case "get-bookmarks-by-tag":
-//                return new GetBookmarksByTagCommand(command, arguments);
-            default:
-                return new UnknownCommand(command, arguments, sessionId);
-        }
+        return switch (command) {
+            case REGISTER -> new RegisterCommand(command, arguments, sessionId);
+            case LOGIN -> new LoginCommand(command, arguments, sessionId);
+            case LOGOUT -> new LogoutCommand(command, arguments, sessionId);
+            case NEW_GROUP -> new AddGroupCommand(command, arguments, sessionId);
+            case ADD -> new AddBookmarkCommand(command, arguments, sessionId);
+            case REMOVE -> new RemoveBookmarkCommand(command, arguments, sessionId);
+            default -> new UnknownCommand(command, arguments, sessionId);
+        };
     }
 }

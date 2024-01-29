@@ -129,11 +129,6 @@ public class ContextData extends Context {
     }
 
     @Override
-    public List<Group> getBookmarkGroups(String username){
-        return bookmarkGroups.get(username);
-    }
-
-    @Override
     public void addGroup(String username, Group group) {
         Validator.validateString(username, "Username cannot be null or empty");
         try {
@@ -158,6 +153,11 @@ public class ContextData extends Context {
                 return gr;
             }
         };
+        updateGroups(username);
+        return bookmarkGroups.get(username).stream().filter(group -> group.getName().equals(groupName)).findFirst().orElse(null);
+    }
+
+    private void updateGroups(String username){
         String path = ROOT + "bookmarks\\" + username;
         try {
             Files.walk(Paths.get(path)).forEach(filePath -> {
@@ -171,8 +171,24 @@ public class ContextData extends Context {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return bookmarkGroups.get(username).stream().filter(group -> group.getName().equals(groupName)).findFirst().orElse(null);
     }
+
+    private void updateGroup(String username, String groupName){
+        String path = ROOT + "bookmarks\\" + username + "\\" + groupName + ".txt";
+
+        try (Reader reader = new FileReader(path)) {
+            String line;
+            while ((line = new BufferedReader(reader).readLine()) != null && !line.isBlank()) {
+                Bookmark b = GSON.fromJson(line, Bookmark.class);
+                if (getGroup(username, groupName).getBookmarks().stream().noneMatch(book -> book.url().equals(b.url()))) {
+                    getGroup(username, groupName).addBookmark(b);
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
     @Override
     public boolean isExistingGroup(String username, String groupName) {
@@ -239,5 +255,28 @@ public class ContextData extends Context {
     @Override
     public boolean isExistingBookmark(String username, String groupName, String url) {
         return getBookmark(username, groupName, url) != null;
+    }
+
+    @Override
+    public void removeBookmark(String username, String groupName, String bookmarkUrl) {
+        if (!isRegistered(username)) {
+            throw new AuthException("User " + username + " is not registered");
+        }
+
+        Group group = getGroup(username, groupName);
+
+        if (group == null) {
+            throw new IllegalArgumentException("Group " + groupName + " does not exist");
+        }
+
+        group.removeBookmark(bookmarkUrl);
+
+        String path = ROOT + "bookmarks\\" + username + "\\" + groupName + ".txt";
+        try (Writer writer = new StringWriter()) {
+            Files.write(Paths.get(path), writer.toString().getBytes());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        group.getBookmarks().forEach(bookmark -> addNewBookmark(bookmark, path));
     }
 }

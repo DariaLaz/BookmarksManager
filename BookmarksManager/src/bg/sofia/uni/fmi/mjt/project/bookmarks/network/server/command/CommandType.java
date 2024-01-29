@@ -5,8 +5,8 @@ public enum CommandType {
     LOGIN("login"),
     LOGOUT("logout"),
     NEW_GROUP("new-group"),
-    ADD("add-to"), //so far
-    REMOVE("remove-from"),
+    ADD("add-to"),
+    REMOVE("remove-from"),//so far
     LIST("list"),
     SEARCH("search"),
     CLEANUP("cleanup"),

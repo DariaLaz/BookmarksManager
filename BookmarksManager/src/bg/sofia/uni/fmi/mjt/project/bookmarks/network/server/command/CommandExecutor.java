@@ -43,7 +43,7 @@ public class CommandExecutor {
             case LOGOUT -> new CommandDetails(LOGOUT, args, sessionId);
             case NEW_GROUP -> new CommandDetails(NEW_GROUP, args, sessionId);
             case ADD -> new CommandDetails(ADD, args, sessionId);
-            case REMOVE -> null;
+            case REMOVE -> new CommandDetails(REMOVE, args, sessionId);
             case LIST -> null;
             case SEARCH -> null;
             case CLEANUP -> null;

@@ -7,9 +7,10 @@ import javax.naming.AuthenticationException;
 import java.util.List;
 
 public interface ContextBookmarks {
-    List<Group> getBookmarkGroups(String username);
     void addGroup(String username, Group group);
     boolean isExistingGroup(String username, String groupName);
     void addBookmark(String username, String groupName, Bookmark bookmark);
     boolean isExistingBookmark(String username, String groupName, String url);
+
+    void removeBookmark(String username, String groupName, String bookmarkUrl);
 }
