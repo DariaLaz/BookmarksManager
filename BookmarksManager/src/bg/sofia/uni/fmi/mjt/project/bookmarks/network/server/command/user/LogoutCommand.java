@@ -4,7 +4,7 @@ import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.CommandBase
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.CommandType;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.Response;
 
-public class LogoutCommand extends CommandBase {
+public class LogoutCommand extends UserCommand {
     public LogoutCommand(CommandType command, String[] arguments, String sessionId) {
         super(command, arguments, sessionId);
     }

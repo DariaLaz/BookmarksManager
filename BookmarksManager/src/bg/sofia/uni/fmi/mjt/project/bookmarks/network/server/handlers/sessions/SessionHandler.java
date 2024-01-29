@@ -11,5 +11,4 @@ public interface SessionHandler {
     boolean register(String username, String password) throws AlreadyExistingException;
     String getSessionID(String username);
     Map<String, String> getActiveSessions();
-    String getUsername(String sessionId);
 }

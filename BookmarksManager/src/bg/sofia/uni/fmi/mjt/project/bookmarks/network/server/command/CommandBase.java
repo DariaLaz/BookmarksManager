@@ -13,8 +13,6 @@ public abstract class CommandBase implements Command {
     private final CommandType command;
     private final String[] arguments;
     private String sessionId;
-    protected static final SessionHandler session = SessionManager.getInstance();
-
     protected static final BookmarkHandler bookmarkHandler = BookmarkManager.getInstance();
 
     public CommandBase(CommandType command, String[] arguments, String sessionId) {

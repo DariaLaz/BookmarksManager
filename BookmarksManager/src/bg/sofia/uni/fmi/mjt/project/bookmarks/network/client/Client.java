@@ -76,6 +76,7 @@ public class Client {
                 byte[] byteArray = new byte[buffer.remaining()];
                 buffer.get(byteArray);
                 String reply = new String(byteArray, "UTF-8"); // buffer drain
+
                 Response response = GSON.fromJson(reply, Response.class);
                 handleResponse(response);
                 System.out.println(response.message());

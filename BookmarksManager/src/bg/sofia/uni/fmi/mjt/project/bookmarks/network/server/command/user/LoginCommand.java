@@ -6,7 +6,7 @@ import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.CommandType
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.Response;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.exceptions.UnvalidParams;
 
-public class LoginCommand extends CommandBase {
+public class LoginCommand extends UserCommand {
     public LoginCommand(CommandType command, String[] arguments, String sessionId) {
         super(command, arguments, sessionId);
     }

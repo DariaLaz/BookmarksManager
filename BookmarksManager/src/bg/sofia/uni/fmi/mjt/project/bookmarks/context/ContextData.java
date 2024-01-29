@@ -1,13 +1,14 @@
 package bg.sofia.uni.fmi.mjt.project.bookmarks.context;
 
 import bg.sofia.uni.fmi.mjt.project.bookmarks.exceptions.AuthException;
+import bg.sofia.uni.fmi.mjt.project.bookmarks.models.Bookmark;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.models.Group;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.models.User;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.helpers.security.Hash;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.helpers.security.PasswordHash;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.helpers.validation.Validator;
+import com.google.gson.Gson;
 
-import javax.naming.AuthenticationException;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -27,7 +28,9 @@ public class ContextData extends Context {
     private Map<String, List<Group>> bookmarkGroups; // username -> groups
     private static final Hash passwordHasher = new PasswordHash();
     private static Context INSTANCE = null;
-    private static final String USERS_FILE = "D:\\github\\BookmarksManager\\BookmarksManager\\src\\bg\\sofia\\uni\\fmi\\mjt\\project\\bookmarks\\network\\server\\data\\users.txt";
+    private static final Gson GSON = new Gson();
+    private static final String ROOT = "D:\\github\\BookmarksManager\\BookmarksManager\\src\\bg\\sofia\\uni\\fmi\\mjt\\project\\bookmarks\\network\\server\\data\\";
+    private static final String USERS_FILE = ROOT + "users.txt";
 
 
     private ContextData() {
@@ -68,13 +71,23 @@ public class ContextData extends Context {
         getRegisteredUsers().put(username, user);
     }
 
+    private void addNewBookmark(Bookmark bookmark, String path){
+        String line = GSON.toJson(bookmark) + "\n";
+        try (Writer writer = new StringWriter()) {
+            writer.write(line);
+            Files.write(Paths.get(path), writer.toString().getBytes(), java.nio.file.StandardOpenOption.APPEND);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public void addNewUser(String username, String hashedPassword)  {
         String id = generateID();
         String line = username + " " + hashedPassword + " " + id + "\n";
         try (Writer writer = new StringWriter()) {
             writer.write(line);
             Files.write(Paths.get(USERS_FILE), writer.toString().getBytes(), java.nio.file.StandardOpenOption.APPEND);
-            Files.createDirectories(Paths.get("D:\\github\\BookmarksManager\\BookmarksManager\\src\\bg\\sofia\\uni\\fmi\\mjt\\project\\bookmarks\\network\\server\\data\\bookmarks\\" + username));
+            Files.createDirectories(Paths.get(ROOT + "bookmarks\\" + username));
             registeredUsers.put(username, new User(username, hashedPassword));
             bookmarkGroups.put(username, new ArrayList<>());
         } catch (Exception e) {
@@ -124,15 +137,14 @@ public class ContextData extends Context {
     public void addGroup(String username, Group group) {
         Validator.validateString(username, "Username cannot be null or empty");
         try {
-            Files.createFile(Paths.get("D:\\github\\BookmarksManager\\BookmarksManager\\src\\bg\\sofia\\uni\\fmi\\mjt\\project\\bookmarks\\network\\server\\data\\bookmarks\\" + username + "\\" + group.getName() + ".txt"));
+            Files.createFile(Paths.get(ROOT + "bookmarks\\" + username + "\\" + group.getName() + ".txt"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
         bookmarkGroups.get(username).add(group);
     }
 
-    @Override
-    public boolean isExistingGroup(String username, String groupName) {
+    private Group getGroup(String username, String groupName){
         Validator.validateString(username, "Username cannot be null or empty");
         Validator.validateString(groupName, "Group name cannot be null or empty");
 
@@ -140,12 +152,13 @@ public class ContextData extends Context {
             throw new AuthException("User " + username + " is not registered");
         }
 
-        if(bookmarkGroups.containsKey(username) &&
-                bookmarkGroups.get(username).stream().anyMatch(group -> group.getName().equals(groupName))){
-            return true;
-        }
-
-        String path = "D:\\github\\BookmarksManager\\BookmarksManager\\src\\bg\\sofia\\uni\\fmi\\mjt\\project\\bookmarks\\network\\server\\data\\bookmarks\\" + username;
+        if(bookmarkGroups.containsKey(username)){
+            Group gr = bookmarkGroups.get(username).stream().filter(group -> group.getName().equals(groupName)).findFirst().orElse(null);
+            if (gr != null) {
+                return gr;
+            }
+        };
+        String path = ROOT + "bookmarks\\" + username;
         try {
             Files.walk(Paths.get(path)).forEach(filePath -> {
                 if (Files.isRegularFile(filePath)) {
@@ -158,7 +171,73 @@ public class ContextData extends Context {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        return bookmarkGroups.get(username).stream().filter(group -> group.getName().equals(groupName)).findFirst().orElse(null);
+    }
 
-        return bookmarkGroups.get(username).stream().anyMatch(group -> group.getName().equals(groupName));
+    @Override
+    public boolean isExistingGroup(String username, String groupName) {
+        return getGroup(username, groupName) != null;
+    }
+
+    @Override
+    public void addBookmark(String username, String groupName, Bookmark bookmark) {
+        if (!isRegistered(username)) {
+            throw new AuthException("User " + username + " is not registered");
+        }
+
+        Group group = getGroup(username, groupName);
+        if (group == null) {
+            throw new IllegalArgumentException("Group " + groupName + " does not exist");
+        }
+
+        try {
+            addNewBookmark(bookmark, ROOT + "bookmarks\\" + username + "\\" + groupName + ".txt");
+            group.addBookmark(bookmark);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private Bookmark getBookmark(String username, String groupName, String url){
+        Validator.validateString(username, "Username cannot be null or empty");
+        Validator.validateString(groupName, "Group name cannot be null or empty");
+        Validator.validateString(url, "Url cannot be null or empty");
+
+        if (!isRegistered(username)) {
+            throw new AuthException("User " + username + " is not registered");
+        }
+
+        Group group = getGroup(username, groupName);
+
+        if (group == null) {
+            throw new IllegalArgumentException("Group " + groupName + " does not exist");
+        }
+
+        Bookmark bookmark = group.getBookmarks().stream().filter(b -> b.url().equals(url)).findFirst().orElse(null);
+
+        if (bookmark != null) {
+            return bookmark;
+        }
+
+        String path = ROOT + "bookmarks\\" + username + "\\" + groupName + ".txt";
+
+        try (Reader reader = new FileReader(path)) {
+            String line;
+            while ((line = new BufferedReader(reader).readLine()) != null && !line.isBlank()) {
+                Bookmark b = GSON.fromJson(line, Bookmark.class);
+                if (group.getBookmarks().stream().noneMatch(book -> book.url().equals(b.url()))) {
+                    group.addBookmark(b);
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return group.getBookmarks().stream().filter(b -> b.url().equals(url)).findFirst().orElse(null);
+    }
+
+    @Override
+    public boolean isExistingBookmark(String username, String groupName, String url) {
+        return getBookmark(username, groupName, url) != null;
     }
 }

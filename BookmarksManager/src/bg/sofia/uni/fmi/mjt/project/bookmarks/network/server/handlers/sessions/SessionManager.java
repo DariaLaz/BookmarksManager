@@ -13,14 +13,14 @@ import java.util.Map;
 import java.util.UUID;
 
 public class SessionManager implements SessionHandler {
-    private final Map<String, String> activeSessions; // username -> sessionID
+    private static final Map<String, String> activeSessions = new HashMap<>(); // username -> sessionID
     private static final Hash passwordHasher = new PasswordHash();
     private static final Validator VALIDATOR = new Validator();
     protected static final ContextUsers context = ContextData.getInstance();
 
     private static SessionHandler INSTANCE = null;
     private SessionManager() {
-        activeSessions = new HashMap<>();
+
     }
     public static SessionHandler getInstance() {
         if (INSTANCE == null) {
@@ -34,9 +34,8 @@ public class SessionManager implements SessionHandler {
         return activeSessions;
     }
 
-    @Override
-    public String getUsername(String sessionId) {
-        return getActiveSessions().entrySet().stream()
+    public static String getUsername(String sessionId) {
+        return activeSessions.entrySet().stream()
                 .filter(e -> e.getValue().equals(sessionId))
                 .map(Map.Entry::getKey)
                 .findFirst()

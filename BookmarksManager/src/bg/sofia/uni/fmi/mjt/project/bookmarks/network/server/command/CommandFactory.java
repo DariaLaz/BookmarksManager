@@ -1,5 +1,6 @@
 package bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command;
 
+import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.bookmarks.AddCommand;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.bookmarks.AddGroupCommand;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.user.LoginCommand;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.user.LogoutCommand;
@@ -16,8 +17,8 @@ public class CommandFactory {
                 return new LogoutCommand(command, arguments, sessionId);
             case NEW_GROUP:
                 return new AddGroupCommand(command, arguments, sessionId);
-//            case "remove-bookmark":
-//                return new RemoveBookmarkCommand(command, arguments);
+            case ADD:
+                return new AddCommand(command, arguments, sessionId);
 //            case "get-bookmarks":
 //                return new GetBookmarksCommand(command, arguments);
 //            case "get-bookmarks-by-tag":

@@ -6,8 +6,7 @@ import bg.sofia.uni.fmi.mjt.project.bookmarks.network.Response;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.CommandBase;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.CommandType;
 
-public class AddGroupCommand extends CommandBase {
-    private static final ContextBookmarks bookmarks = ContextData.getInstance();
+public class AddGroupCommand extends BookmarkCommand {
     public AddGroupCommand(CommandType command, String[] arguments, String sessionId) {
         super(command, arguments, sessionId);
     }
@@ -23,8 +22,7 @@ public class AddGroupCommand extends CommandBase {
     @Override
     public Response execute() {
         try{
-            String username = session.getUsername(getSessionId());
-            if (bookmarkHandler.addGroup(username, getGroupName())) {
+            if (bookmarkHandler.addGroup(getSessionId(), getGroupName())) {
                 return new Response("Successfully added group", true, null, CommandType.NEW_GROUP);
             }
         }

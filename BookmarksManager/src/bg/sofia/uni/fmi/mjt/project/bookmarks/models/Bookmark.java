@@ -5,17 +5,20 @@ import java.util.Map;
 public record Bookmark(String title,
                        String url,
                        Map<String, Integer> keyWords) { // word -> count
-    public Bookmark of(String url) {
+    public static Bookmark of(String url) {
         return new Bookmark(getTitle(url), url, getKeyWords(url));
     }
 
-    private Map<String, Integer> getKeyWords(String url) {
+    private static Map<String, Integer> getKeyWords(String url) {
         //todo implement
-        return null;
+        return Map.of("fmi", 1,
+                      "sofia", 2,
+                      "sliven", 3
+        );
     }
 
-    private String getTitle(String url) {
+    private static String getTitle(String url) {
         //todo implement
-        return null;
+        return "title";
     }
 }

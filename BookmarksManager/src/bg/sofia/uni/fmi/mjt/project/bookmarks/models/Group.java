@@ -16,6 +16,10 @@ public class Group {
         return name;
     }
 
+    public List<Bookmark> getBookmarks() {
+        return bookmarks;
+    }
+
     public void addBookmark(Bookmark bookmark) {
         bookmarks.add(bookmark);
     }
