@@ -44,7 +44,7 @@ public class CommandExecutor {
             case NEW_GROUP -> new CommandDetails(NEW_GROUP, args, sessionId);
             case ADD -> new CommandDetails(ADD, args, sessionId);
             case REMOVE -> new CommandDetails(REMOVE, args, sessionId);
-            case LIST -> null;
+            case LIST -> new CommandDetails(LIST, args, sessionId);
             case SEARCH -> null;
             case CLEANUP -> null;
             case IMPORT -> null;

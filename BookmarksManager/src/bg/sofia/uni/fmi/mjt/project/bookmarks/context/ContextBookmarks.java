@@ -13,4 +13,7 @@ public interface ContextBookmarks {
     boolean isExistingBookmark(String username, String groupName, String url);
 
     void removeBookmark(String username, String groupName, String bookmarkUrl);
+    List<Bookmark> getBookmarks(String username, String s);
+
+    List<Bookmark> getBookmarks(String username);
 }

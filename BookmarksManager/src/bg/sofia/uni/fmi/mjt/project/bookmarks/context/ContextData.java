@@ -175,10 +175,10 @@ public class ContextData extends Context {
 
     private void updateGroup(String username, String groupName){
         String path = ROOT + "bookmarks\\" + username + "\\" + groupName + ".txt";
-
-        try (Reader reader = new FileReader(path)) {
-            String line;
-            while ((line = new BufferedReader(reader).readLine()) != null && !line.isBlank()) {
+        String line;
+        try (Reader reader = new FileReader(path);
+             var r = new BufferedReader(reader);) {
+            while ((line = r.readLine()) != null && !line.isBlank()) {
                 Bookmark b = GSON.fromJson(line, Bookmark.class);
                 if (getGroup(username, groupName).getBookmarks().stream().noneMatch(book -> book.url().equals(b.url()))) {
                     getGroup(username, groupName).addBookmark(b);
@@ -278,5 +278,45 @@ public class ContextData extends Context {
             throw new RuntimeException(e);
         }
         group.getBookmarks().forEach(bookmark -> addNewBookmark(bookmark, path));
+    }
+
+    @Override
+    public List<Bookmark> getBookmarks(String username, String s) {
+
+        if (!isRegistered(username)) {
+            throw new AuthException("User " + username + " is not registered");
+        }
+        if (!isExistingGroup(username, s)) {
+            throw new IllegalArgumentException("Group " + s + " does not exist");
+        }
+        updateGroups(username);
+
+        List<Bookmark> bookmarks = new ArrayList<>();
+
+        bookmarkGroups.get(username).forEach(group -> {
+            if(group.getName().equals(s)) {
+                updateGroup(username, group.getName());
+                bookmarks.addAll(group.getBookmarks());
+            }
+        });
+
+        return bookmarks;
+    }
+
+    @Override
+    public List<Bookmark> getBookmarks(String username) {
+        if (!isRegistered(username)) {
+            throw new AuthException("User " + username + " is not registered");
+        }
+
+        List<Bookmark> bookmarks = new ArrayList<>();
+        updateGroups(username);
+
+        bookmarkGroups.get(username).forEach(group -> {
+            updateGroup(username, group.getName());
+            bookmarks.addAll(group.getBookmarks());
+        });
+
+        return bookmarks;
     }
 }

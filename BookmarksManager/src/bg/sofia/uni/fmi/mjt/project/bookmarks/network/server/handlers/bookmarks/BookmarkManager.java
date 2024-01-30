@@ -8,6 +8,9 @@ import bg.sofia.uni.fmi.mjt.project.bookmarks.models.Group;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.handlers.sessions.SessionManager;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.helpers.validation.Validator;
 
+import java.util.List;
+import java.util.Optional;
+
 public class BookmarkManager implements BookmarkHandler {
     private static BookmarkManager INSTANCE = null;
     protected static final ContextBookmarks context = ContextData.getInstance();
@@ -73,6 +76,20 @@ public class BookmarkManager implements BookmarkHandler {
         context.removeBookmark(username, groupName, bookmarkUrl);
 
         return true;
+    }
+
+    @Override
+    public List<Bookmark> listBookmarks(String username, Optional<String> groupName) {
+        Validator.validateString(username, "Username cannot be null or empty");
+
+        List<Bookmark> bookmarks;
+
+        if (groupName.isPresent()) {
+            bookmarks = context.getBookmarks(username, groupName.get());
+        } else {
+            bookmarks = context.getBookmarks(username);
+        }
+        return bookmarks;
     }
 
     private Bookmark getBookmark(String url){
