@@ -15,7 +15,7 @@ import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
 
 public class Server {
-    private static final int BUFFER_SIZE = 1024;
+    private static final int BUFFER_SIZE = 10000;
     private static final String HOST = "localhost";
     private final int port;
     private boolean isRunning = true;
@@ -64,7 +64,8 @@ public class Server {
                         try {
                             Response response = commandExecutor.handle(GSON.fromJson(clientInput, Request.class));
                             buffer.flip();
-                            writeClientOutput(clientChannel, GSON.toJson(response));
+                            String output = GSON.toJson(response);
+                            writeClientOutput(clientChannel, output);
 
                         } catch (UnknownCommand e) {
                             writeClientOutput(clientChannel, e.getMessage());
