@@ -1,7 +1,7 @@
 package bg.sofia.uni.fmi.mjt.project.bookmarks.network.client;
 
+import bg.sofia.uni.fmi.mjt.project.bookmarks.models.Bookmark;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.Request;
-import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.CommandType;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.Response;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.exceptions.UnknownUser;
 import com.google.gson.Gson;
@@ -11,6 +11,9 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 import java.util.Scanner;
 
 public class Client {
@@ -38,18 +41,43 @@ public class Client {
         this.sessionId = null;
     }
 
-    private void handleResponse(Response response) {
-        if (response.commandType().equals(CommandType.LOGIN)) {
-            setSessionId(response.sessionID());
-        } else if (response.commandType().equals(CommandType.LOGOUT)) {
-            removeSession();
+    private String handleResponse(Response response) {
+        if (!response.successful()) {
+            return response.message();
         }
+
+        switch (response.commandType()) {
+            case LOGIN: {
+                setSessionId(response.sessionID());
+                return response.message();
+            }
+            case LOGOUT: {
+                removeSession();
+                return response.message();
+            }
+            case SEARCH, LIST: {
+                List<Bookmark> bookmarks = Arrays.stream(GSON.fromJson(response.message(), Bookmark[].class)).toList();
+                return listResultToString(bookmarks);
+            }
+            default: return response.message();
+        }
+    }
+
+    private String listResultToString(List<Bookmark> bookmarks) {
+        StringBuilder bookmarksString = new StringBuilder();
+        for (Bookmark bookmark : bookmarks) {
+            if (Objects.isNull(bookmark.title()) || bookmark.title().isBlank()) {
+                bookmarksString.append(bookmark.url()).append("\n");
+                continue;
+            }
+            bookmarksString.append(bookmark.title()).append(" -> ").append(bookmark.url()).append("\n");
+        }
+        return bookmarksString.toString();
     }
 
     private void handleReply(String reply) {
         Response response = GSON.fromJson(reply, Response.class);
-        handleResponse(response);
-        System.out.println(response.message());
+        System.out.println(handleResponse(response));
     }
 
     public void start() {
