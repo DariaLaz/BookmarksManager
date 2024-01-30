@@ -8,18 +8,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class WebPageExtractor implements PageExtractor {
     Document doc;
-    private final int COUNT = 10;
-    private final static Set<String> IGNORE = Set.of("", "a", "an", "and", "are", "as", "at", "be", "by",
+    private static final int COUNT = 10;
+    private static final Set<String> IGNORE = Set.of("", "a", "an", "and", "are", "as", "at", "be", "by",
             "for", "from", "has", "he", "in", "is", "it", "its", "of", "on", "that", "the", "to", "was", "were",
             "will", "with",  "www", "com", "org", "net", "info", "edu", "gov", "mil", "int", "co", "uk",
             "...", ",", ".", "!", "?", "(", ")", "[", "]", "{", "}", "-", "–", "—", ":", ";", "\"", "'", "’", "“");
     public WebPageExtractor(String url) throws IOException {
         this.doc = Jsoup.connect(url).get();
     }
+
     @Override
     public String title() {
         return doc.title();
@@ -36,26 +36,29 @@ public class WebPageExtractor implements PageExtractor {
         Map<String, Integer> wordCount = new HashMap<>();
         for (String word : words) {
             String newWord = getWord(word);
-            if(IGNORE.contains(newWord)){
+            if (IGNORE.contains(newWord)) {
                 continue;
             }
-            if(!wordCount.containsKey(newWord)){
+            if (!wordCount.containsKey(newWord)) {
                 wordCount.put(newWord, 0);
             }
             wordCount.put(newWord, wordCount.get(newWord) + 1);
         }
         return wordCount.entrySet().stream()
                 .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
-                .limit(10)
+                .limit(COUNT)
                 .map(Map.Entry::getKey)
                 .toList();
     }
 
     private String getWord(String word) {
+        //TODO refactor
         word = word.replace(".", "");
-        if (word.endsWith(",") || word.endsWith(".") || word.endsWith("!") || word.endsWith("?") || word.endsWith(")") || word.endsWith("]") || word.endsWith("}"))
+        if (word.endsWith(",") || word.endsWith(".") || word.endsWith("!")
+                || word.endsWith("?") || word.endsWith(")") || word.endsWith("]") || word.endsWith("}"))
             word = word.substring(0, word.length() - 1).toLowerCase();
-        if (word.startsWith("\"") || word.startsWith("'") || word.startsWith("“") || word.startsWith("(") || word.startsWith("[") || word.startsWith("{"))
+        if (word.startsWith("\"") || word.startsWith("'") || word.startsWith("“")
+                || word.startsWith("(") || word.startsWith("[") || word.startsWith("{"))
             word = word.substring(1).toLowerCase();
         if (word.endsWith("ly") || word.endsWith("ed") || word.endsWith("es"))
             word = word.substring(0, word.length() - 2).toLowerCase();

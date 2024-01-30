@@ -5,7 +5,6 @@ import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.external.Jsoup.WebP
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 public record Bookmark(String title,
                        String url,
@@ -18,6 +17,4 @@ public record Bookmark(String title,
             return new Bookmark(null, url, null);
         }
     }
-
-
 }

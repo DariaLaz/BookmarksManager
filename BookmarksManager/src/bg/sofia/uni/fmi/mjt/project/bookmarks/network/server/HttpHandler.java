@@ -2,8 +2,6 @@ package bg.sofia.uni.fmi.mjt.project.bookmarks.network.server;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.URL;
 
 public class HttpHandler {

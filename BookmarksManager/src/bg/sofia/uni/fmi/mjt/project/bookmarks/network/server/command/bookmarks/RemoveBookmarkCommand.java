@@ -30,12 +30,11 @@ public class RemoveBookmarkCommand extends BookmarkCommand  {
 
     @Override
     public Response execute() {
-        try{
-            if (bookmarkHandler.removeBookmark(getSessionId(), getGroupName(), getBookmarkUrl())) {
+        try {
+            if (BOOKMARK_HANDLER.removeBookmark(getSessionId(), getGroupName(), getBookmarkUrl())) {
                 return new Response("Successfully removed bookmark", true, null, getCommand());
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             return new Response(e.getMessage(), false, null, getCommand());
         }
         return new Response("Something went wrong. Try again!", false, null, getCommand());

@@ -20,6 +20,7 @@ public class Client {
     private static ByteBuffer buffer = ByteBuffer.allocateDirect(BUFFER_SIZE);
     private String sessionId = null;
     private static final Gson GSON = new Gson();
+    private boolean isRunning = true;
 
     public Client(int port, String host) {
         this.port = port;
@@ -40,46 +41,41 @@ public class Client {
     private void handleResponse(Response response) {
         if (response.commandType().equals(CommandType.LOGIN)) {
             setSessionId(response.sessionID());
-        }
-        else if (response.commandType().equals(CommandType.LOGOUT)) {
+        } else if (response.commandType().equals(CommandType.LOGOUT)) {
             removeSession();
         }
     }
 
+    private void handleReply(String reply) {
+        Response response = GSON.fromJson(reply, Response.class);
+        handleResponse(response);
+        System.out.println(response.message());
+    }
+
     public void start() {
-
         try (SocketChannel socketChannel = SocketChannel.open();
-             Scanner scanner = new Scanner(System.in)) {
-
+            Scanner scanner = new Scanner(System.in)) {
             socketChannel.connect(new InetSocketAddress(host, port));
 
-            System.out.println("Connected to the server.");
-
-            while (true) {
-                System.out.print("Enter message: ");
-                String message = scanner.nextLine(); // read a line from the console
-
-                if ("quit".equals(message)) {
-                    break;
-                }
+            while (isRunning) {
+                System.out.print("Enter command: ");
+                String message = scanner.nextLine();
 
                 Request request = new Request(message, sessionId);
-                buffer.clear(); // switch to writing mode
-                buffer.put(GSON.toJson(request).getBytes()); // buffer fill
-                buffer.flip(); // switch to reading mode
-                socketChannel.write(buffer); // buffer drain
+                buffer.clear();
+                buffer.put(GSON.toJson(request).getBytes());
+                buffer.flip();
+                socketChannel.write(buffer);
 
-                buffer.clear(); // switch to writing mode
-                socketChannel.read(buffer); // buffer fill
-                buffer.flip(); // switch to reading mode
+                buffer.clear();
+                socketChannel.read(buffer);
+                buffer.flip();
 
                 byte[] byteArray = new byte[buffer.remaining()];
                 buffer.get(byteArray);
                 String reply = new String(byteArray, StandardCharsets.UTF_8); // buffer drain
 
-                Response response = GSON.fromJson(reply, Response.class);
-                handleResponse(response);
-                System.out.println(response.message());
+                handleReply(reply);
             }
 
         } catch (IOException e) {

@@ -1,7 +1,6 @@
 package bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.user;
 
 import bg.sofia.uni.fmi.mjt.project.bookmarks.exceptions.AlreadyExistingException;
-import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.CommandBase;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.CommandType;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.Response;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.exceptions.UnvalidParams;
@@ -30,7 +29,7 @@ public class RegisterCommand extends UserCommand {
     @Override
     public Response execute() {
         try {
-            if(session.register(getUsername(), getPassword())) {
+            if (SESSION.register(getUsername(), getPassword())) {
                 return new Response("User registered successfully", true, null, getCommand());
             }
         } catch (AlreadyExistingException e) {

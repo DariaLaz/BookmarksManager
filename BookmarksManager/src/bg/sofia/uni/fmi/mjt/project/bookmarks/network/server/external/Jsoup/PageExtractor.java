@@ -4,5 +4,6 @@ import java.util.List;
 
 public interface PageExtractor {
     String title();
+
     List<String> keywords();
 }

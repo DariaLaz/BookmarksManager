@@ -6,7 +6,7 @@ import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.handlers.sessions.S
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.handlers.sessions.SessionManager;
 
 public abstract class UserCommand extends CommandBase {
-    protected static final SessionHandler session = SessionManager.getInstance();
+    protected static final SessionHandler SESSION = SessionManager.getInstance();
     public UserCommand(CommandType command, String[] arguments, String sessionId) {
         super(command, arguments, sessionId);
     }

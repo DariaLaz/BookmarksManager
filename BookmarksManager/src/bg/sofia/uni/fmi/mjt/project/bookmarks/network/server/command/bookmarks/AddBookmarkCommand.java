@@ -5,13 +5,18 @@ import bg.sofia.uni.fmi.mjt.project.bookmarks.network.Response;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.CommandType;
 
 public class AddBookmarkCommand extends BookmarkCommand {
+    public static final int GROUP_NAME_INDEX = 0;
+    public static final int BOOKMARK_URL_INDEX = 1;
+    public static final int SHORTEN_INDEX = 2;
+    public static final String SHORTEN_STR_ARGUMENT = "shorten";
+    public static final int MAX_SIZE = 3;
     public AddBookmarkCommand(CommandType command, String[] arguments, String sessionId) {
         super(command, arguments, sessionId);
     }
 
     public String getGroupName() {
         try {
-            return getArguments()[0];
+            return getArguments()[GROUP_NAME_INDEX];
         } catch (ArrayIndexOutOfBoundsException e) {
             throw new IllegalArgumentException("Group name is required");
         }
@@ -19,7 +24,7 @@ public class AddBookmarkCommand extends BookmarkCommand {
 
     public String getBookmarkUrl() {
         try {
-            String url = getArguments()[1];
+            String url = getArguments()[BOOKMARK_URL_INDEX];
             if (!url.startsWith("http://") && !url.startsWith("https://")) {
                 url = "https://" + url;
             }
@@ -30,18 +35,19 @@ public class AddBookmarkCommand extends BookmarkCommand {
     }
 
     public boolean isShorten() throws UnknownCommand {
-        if (getArguments().length < 3) {
+        if (getArguments().length < MAX_SIZE) {
             return false;
         }
-        if (getArguments()[2].equals("shorten")) {
+        if (getArguments()[SHORTEN_INDEX].equals(SHORTEN_STR_ARGUMENT)) {
             return true;
         }
         throw new UnknownCommand("Unknown argument");
     }
+
     @Override
     public Response execute() {
         try {
-            if (bookmarkHandler.addBookmark(getSessionId(), getGroupName(), getBookmarkUrl(), isShorten())) {
+            if (BOOKMARK_HANDLER.addBookmark(getSessionId(), getGroupName(), getBookmarkUrl(), isShorten())) {
                 return new Response("Successfully added bookmark", true, null, getCommand());
             }
         } catch (Exception e) {

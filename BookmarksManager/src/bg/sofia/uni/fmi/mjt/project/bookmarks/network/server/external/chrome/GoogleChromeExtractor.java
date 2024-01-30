@@ -7,15 +7,13 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
-import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 
 public class GoogleChromeExtractor implements BookmarksExtractor {
-    private static final String BOOKMARKS_FILE_PATH = "C:\\Users\\User\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\Bookmarks";
+    private static final String BOOKMARKS_FILE_PATH =
+            "C:\\Users\\User\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\Bookmarks";
     private static final Gson GSON = new Gson();
     @Override
     public List<Bookmark> extract() {

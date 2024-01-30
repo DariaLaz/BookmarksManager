@@ -6,7 +6,7 @@ public enum CommandType {
     LOGOUT("logout"),
     NEW_GROUP("new-group"),
     ADD("add-to"),
-    REMOVE("remove-from"),//so far
+    REMOVE("remove-from"),
     LIST("list"),
     SEARCH("search"),
     CLEANUP("cleanup"),

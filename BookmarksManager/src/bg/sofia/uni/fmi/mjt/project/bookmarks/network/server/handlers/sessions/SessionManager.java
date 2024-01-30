@@ -13,29 +13,30 @@ import java.util.Map;
 import java.util.UUID;
 
 public class SessionManager implements SessionHandler {
-    private static final Map<String, String> activeSessions = new HashMap<>(); // username -> sessionID
-    private static final Hash passwordHasher = new PasswordHash();
+    private static final Map<String, String> ACTIVE_SESSIONS = new HashMap<>(); // username -> sessionID
+    private static final Hash PASSWORD_HASHER = new PasswordHash();
     private static final Validator VALIDATOR = new Validator();
-    protected static final ContextUsers context = ContextData.getInstance();
+    protected static final ContextUsers CONTEXT = ContextData.getInstance();
 
-    private static SessionHandler INSTANCE = null;
+    private static SessionHandler instance = null;
     private SessionManager() {
 
     }
+
     public static SessionHandler getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new SessionManager();
+        if (instance == null) {
+            instance = new SessionManager();
         }
-        return INSTANCE;
+        return instance;
     }
 
     @Override
-    public Map<String, String> getActiveSessions(){
-        return activeSessions;
+    public Map<String, String> getActiveSessions() {
+        return ACTIVE_SESSIONS;
     }
 
     public static String getUsername(String sessionId) {
-        return activeSessions.entrySet().stream()
+        return ACTIVE_SESSIONS.entrySet().stream()
                 .filter(e -> e.getValue().equals(sessionId))
                 .map(Map.Entry::getKey)
                 .findFirst()
@@ -55,10 +56,10 @@ public class SessionManager implements SessionHandler {
         if (isLogged(username)) {
             throw new AlreadyExistingException("Cannot check password for logged user " + username);
         }
-        if (!context.isRegistered(username)) {
+        if (!CONTEXT.isRegistered(username)) {
             throw new UnknownUser("Cannot login user " + username + " because they are not registered");
         }
-        if (!context.isCorrectPassword(username, password)) {
+        if (!CONTEXT.isCorrectPassword(username, password)) {
             throw new IllegalArgumentException("Cannot login user " + username + " because the password is incorrect");
         }
         String sessionID = UUID.randomUUID().toString();
@@ -74,7 +75,8 @@ public class SessionManager implements SessionHandler {
                 .filter(e -> e.getValue().equals(sessionID))
                 .map(Map.Entry::getKey)
                 .findFirst()
-                .orElseThrow(() -> new UnknownUser("Cannot logout user with sessionID " + sessionID + " because they are not logged in"));
+                .orElseThrow(() -> new UnknownUser(
+                        "Cannot logout user with sessionID " + sessionID + " because they are not logged in"));
         if (!isLogged(username)) {
             throw new UnknownUser("Cannot logout user " + username + " because they are not logged in");
         }
@@ -84,13 +86,14 @@ public class SessionManager implements SessionHandler {
 
     @Override
     public synchronized boolean register(String username, String password) throws AlreadyExistingException {
-        if (context.isRegistered(username)) {
-            throw new AlreadyExistingException("Cannot register user with username " + username + " because it already exists");
+        if (CONTEXT.isRegistered(username)) {
+            throw new AlreadyExistingException(
+                    "Cannot register user with username " + username + " because it already exists");
         }
 
-        String hashedPassword = passwordHasher.hash(password);
+        String hashedPassword = PASSWORD_HASHER.hash(password);
         try {
-            context.addNewUser(username, hashedPassword);
+            CONTEXT.addNewUser(username, hashedPassword);
         } catch (Exception e) {
             return false;
         }
@@ -101,11 +104,13 @@ public class SessionManager implements SessionHandler {
     public String getSessionID(String username) {
         return getActiveSessions().get(username);
     }
-    private void setToActiveSessions(String username, String sessionID){
-        activeSessions.put(username, sessionID);
+    
+    private void setToActiveSessions(String username, String sessionID) {
+        ACTIVE_SESSIONS.put(username, sessionID);
     }
-    private void removeFromActiveSessions(String username){
-        activeSessions.remove(username);
+
+    private void removeFromActiveSessions(String username) {
+        ACTIVE_SESSIONS.remove(username);
     }
 
 }

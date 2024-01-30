@@ -4,7 +4,6 @@ import bg.sofia.uni.fmi.mjt.project.bookmarks.exceptions.AuthException;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.models.Bookmark;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.models.Group;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.models.User;
-import bg.sofia.uni.fmi.mjt.project.bookmarks.network.Response;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.HttpHandler;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.external.chrome.BookmarksExtractor;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.external.chrome.GoogleChromeExtractor;
@@ -30,13 +29,13 @@ import java.util.UUID;
 public class ContextData extends Context {
     private Map<String, User> registeredUsers;
     private Map<String, List<Group>> bookmarkGroups; // username -> groups
-    private static final Hash passwordHasher = new PasswordHash();
-    private static Context INSTANCE = null;
+    private static final Hash PASSWORD_HASHER = new PasswordHash();
+    private static Context instance = null;
     private static final Gson GSON = new Gson();
-    private static final String ROOT = "D:\\github\\BookmarksManager\\BookmarksManager\\src\\bg\\sofia\\uni\\fmi\\mjt\\project\\bookmarks\\network\\server\\data\\";
+    private static final String ROOT =
+            "D:\\github\\BookmarksManager\\BookmarksManager\\src\\bg\\sofia\\uni\\fmi\\mjt\\project\\bookmarks\\network\\server\\data\\";
     private static final String USERS_FILE = ROOT + "users.txt";
     private static final BookmarksExtractor BOOKMARKS_EXTRACTOR = new GoogleChromeExtractor();
-
 
     private ContextData() {
         bookmarkGroups = new HashMap<>();
@@ -44,22 +43,24 @@ public class ContextData extends Context {
     }
 
     public static final Context getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new ContextData();
+        if (instance == null) {
+            instance = new ContextData();
         }
-        return INSTANCE;
+        return instance;
     }
 
-    public Map<String, User> getRegisteredUsers(){
+    public Map<String, User> getRegisteredUsers() {
         return registeredUsers;
     }
+
     @Override
     public synchronized boolean isRegistered(String username) {
         //check cache
         return getUser(username) != null;
     }
-    public User getUser(String username){
-        if (getRegisteredUsers().containsKey(username)){
+
+    public User getUser(String username) {
+        if (getRegisteredUsers().containsKey(username)) {
             return getRegisteredUsers().get(username);
         }
         try (Reader reader = new FileReader(USERS_FILE)) {
@@ -67,16 +68,17 @@ public class ContextData extends Context {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        if (getRegisteredUsers().containsKey(username)){
+        if (getRegisteredUsers().containsKey(username)) {
             return getRegisteredUsers().get(username);
         }
         return null;
     }
-    private void setToRegisteredUsers(String username, User user){
+
+    private void setToRegisteredUsers(String username, User user) {
         getRegisteredUsers().put(username, user);
     }
 
-    private void addNewBookmark(Bookmark bookmark, String path){
+    private void addNewBookmark(Bookmark bookmark, String path) {
         String line = GSON.toJson(bookmark) + "\n";
         try (Writer writer = new StringWriter()) {
             writer.write(line);
@@ -99,21 +101,23 @@ public class ContextData extends Context {
             throw new RuntimeException(e);
         }
     }
+
     @Override
     public boolean isCorrectPassword(String username, String password) {
         Validator.validateString(username, "Username cannot be null or empty");
         Validator.validateString(password, "Password cannot be null or empty");
 
-
         if (isRegistered(username)) {
-            String hashedPassword = passwordHasher.hash(password);
+            String hashedPassword = PASSWORD_HASHER.hash(password);
             return getRegisteredUsers().get(username).password().equals(hashedPassword);
         }
         return false;
     }
-    private static String generateID(){
+
+    private static String generateID() {
         return UUID.randomUUID().toString();
     }
+
     @Override
     public void load(Reader reader) {
 
@@ -144,7 +148,7 @@ public class ContextData extends Context {
         bookmarkGroups.get(username).add(group);
     }
 
-    private Group getGroup(String username, String groupName){
+    private Group getGroup(String username, String groupName) {
         Validator.validateString(username, "Username cannot be null or empty");
         Validator.validateString(groupName, "Group name cannot be null or empty");
 
@@ -152,17 +156,21 @@ public class ContextData extends Context {
             throw new AuthException("User " + username + " is not registered");
         }
 
-        if(bookmarkGroups.containsKey(username)){
-            Group gr = bookmarkGroups.get(username).stream().filter(group -> group.getName().equals(groupName)).findFirst().orElse(null);
+        if (bookmarkGroups.containsKey(username)) {
+            Group gr = bookmarkGroups.get(username).stream()
+                    .filter(group -> group.getName().equals(groupName))
+                    .findFirst().orElse(null);
             if (gr != null) {
                 return gr;
             }
-        };
+        }
         updateGroups(username);
-        return bookmarkGroups.get(username).stream().filter(group -> group.getName().equals(groupName)).findFirst().orElse(null);
+        return bookmarkGroups.get(username).stream()
+                .filter(group -> group.getName().equals(groupName))
+                .findFirst().orElse(null);
     }
 
-    private void updateGroups(String username){
+    private void updateGroups(String username) {
         String path = ROOT + "bookmarks\\" + username;
         try {
             Files.walk(Paths.get(path)).forEach(filePath -> {
@@ -178,14 +186,15 @@ public class ContextData extends Context {
         }
     }
 
-    private void updateGroup(String username, String groupName){
+    private void updateGroup(String username, String groupName) {
         String path = ROOT + "bookmarks\\" + username + "\\" + groupName + ".txt";
         String line;
         try (Reader reader = new FileReader(path);
              var r = new BufferedReader(reader);) {
             while ((line = r.readLine()) != null && !line.isBlank()) {
                 Bookmark b = GSON.fromJson(line, Bookmark.class);
-                if (getGroup(username, groupName).getBookmarks().stream().noneMatch(book -> book.url().equals(b.url()))) {
+                if (getGroup(username, groupName).getBookmarks().stream()
+                        .noneMatch(book -> book.url().equals(b.url()))) {
                     getGroup(username, groupName).addBookmark(b);
                 }
             }
@@ -193,7 +202,6 @@ public class ContextData extends Context {
             throw new RuntimeException(e);
         }
     }
-
 
     @Override
     public boolean isExistingGroup(String username, String groupName) {
@@ -219,7 +227,7 @@ public class ContextData extends Context {
         }
     }
 
-    private Bookmark getBookmark(String username, String groupName, String url){
+    private Bookmark getBookmark(String username, String groupName, String url) {
         Validator.validateString(username, "Username cannot be null or empty");
         Validator.validateString(groupName, "Group name cannot be null or empty");
         Validator.validateString(url, "Url cannot be null or empty");
@@ -287,7 +295,7 @@ public class ContextData extends Context {
         List<Bookmark> bookmarks = new ArrayList<>();
 
         bookmarkGroups.get(username).forEach(group -> {
-            if(group.getName().equals(s)) {
+            if (group.getName().equals(s)) {
                 updateGroup(username, group.getName());
                 bookmarks.addAll(group.getBookmarks());
             }
@@ -326,7 +334,8 @@ public class ContextData extends Context {
 
         return result;
     }
-    private boolean containsAnyKeyword(Bookmark bookmark, List<String> keywords){
+
+    private boolean containsAnyKeyword(Bookmark bookmark, List<String> keywords) {
         for (String keyword : keywords) {
             if (containsKeyword(bookmark, keyword)) {
                 return true;
@@ -338,7 +347,6 @@ public class ContextData extends Context {
     private boolean containsKeyword(Bookmark bookmark, String kw) {
         return bookmark.keyWords().stream().anyMatch(keyword -> keyword.equals(kw));
     }
-
 
     @Override
     public List<Bookmark> searchByTitle(String username, String s) {
@@ -371,7 +379,7 @@ public class ContextData extends Context {
             throw new AuthException("User " + username + " is not registered");
         }
 
-        if(!isExistingGroup(username, "chrome")){
+        if (!isExistingGroup(username, "chrome")) {
             addGroup(username, new Group("chrome"));
         }
         List<Bookmark> bookmarks = BOOKMARKS_EXTRACTOR.extract();
@@ -386,7 +394,7 @@ public class ContextData extends Context {
         }
     }
 
-    private void cleanUpGroup(String username, String groupName){
+    private void cleanUpGroup(String username, String groupName) {
         if (!isRegistered(username)) {
             throw new AuthException("User " + username + " is not registered");
         }
@@ -416,7 +424,7 @@ public class ContextData extends Context {
 
     }
 
-    boolean isValidUrl(String url){
+    boolean isValidUrl(String url) {
         try {
             return HttpHandler.checkIfValidUrl(url);
         } catch (IOException e) {

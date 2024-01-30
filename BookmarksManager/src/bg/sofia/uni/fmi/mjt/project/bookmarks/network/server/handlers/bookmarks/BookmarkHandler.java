@@ -9,7 +9,9 @@ import java.util.Optional;
 
 public interface BookmarkHandler {
     boolean addGroup(String sessionId, String groupName) throws AlreadyExistingException;
-    boolean addBookmark(String sessionId, String groupName, String url, boolean isShorten) throws AlreadyExistingException;
+
+    boolean addBookmark(String sessionId, String groupName, String url, boolean isShorten)
+            throws AlreadyExistingException;
 
     boolean removeBookmark(String sessionId, String groupName, String bookmarkUrl);
 

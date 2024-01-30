@@ -15,28 +15,29 @@ import java.util.List;
 import java.util.Optional;
 
 public class BookmarkManager implements BookmarkHandler {
-    private static BookmarkManager INSTANCE = null;
-    protected static final ContextBookmarks context = ContextData.getInstance();
-    private static final Shortener shortener = new UrlSortener();
+    private static BookmarkManager instance = null;
+    protected static final ContextBookmarks CONTEXT = ContextData.getInstance();
+    private static final Shortener SHORTENER = new UrlSortener();
     private static final Validator VALIDATOR = new Validator();
 
     private BookmarkManager() {
 
     }
+
     public static BookmarkHandler getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new BookmarkManager();
+        if (instance == null) {
+            instance = new BookmarkManager();
         }
-        return INSTANCE;
+        return instance;
     }
 
     public boolean addGroup(String sessionId, String groupName) throws AlreadyExistingException {
         String username = SessionManager.getUsername(sessionId);
-        if (context.isExistingGroup(username, groupName)) {
+        if (CONTEXT.isExistingGroup(username, groupName)) {
             throw new AlreadyExistingException("Cannot add group " + groupName + " because it already exists");
         }
         Group group = new Group(groupName);
-        context.addGroup(username, group);
+        CONTEXT.addGroup(username, group);
         return true;
     }
 
@@ -48,18 +49,19 @@ public class BookmarkManager implements BookmarkHandler {
         Validator.validateString(groupName, "Group name cannot be null or empty");
 
         String username = SessionManager.getUsername(sessionId);
-        if (!context.isExistingGroup(username, groupName)) {
-            throw new IllegalArgumentException("Cannot add bookmark to group " + groupName + " because it does not exist");
+        if (!CONTEXT.isExistingGroup(username, groupName)) {
+            throw new IllegalArgumentException(
+                    "Cannot add bookmark to group " + groupName + " because it does not exist");
         }
-        if (context.isExistingBookmark(username, groupName, url)) {
+        if (CONTEXT.isExistingBookmark(username, groupName, url)) {
             throw new AlreadyExistingException("Cannot add bookmark " + url + " because it already exists");
         }
 
-        if(isShorten) {
+        if (isShorten) {
             url = shorten(url);
         }
 
-        context.addBookmark(username, groupName, getBookmark(url));
+        CONTEXT.addBookmark(username, groupName, getBookmark(url));
 
         return true;
     }
@@ -70,14 +72,16 @@ public class BookmarkManager implements BookmarkHandler {
         Validator.validateString(groupName, "Group name cannot be null or empty");
 
         String username = SessionManager.getUsername(sessionId);
-        if (!context.isExistingGroup(username, groupName)) {
-            throw new IllegalArgumentException("Cannot remove bookmark from group " + groupName + " because it does not exist");
+        if (!CONTEXT.isExistingGroup(username, groupName)) {
+            throw new IllegalArgumentException(
+                    "Cannot remove bookmark from group " + groupName + " because it does not exist");
         }
-        if (!context.isExistingBookmark(username, groupName, bookmarkUrl)) {
-            throw new IllegalArgumentException("Cannot remove bookmark " + bookmarkUrl + " because it does not exist");
+        if (!CONTEXT.isExistingBookmark(username, groupName, bookmarkUrl)) {
+            throw new IllegalArgumentException(
+                    "Cannot remove bookmark " + bookmarkUrl + " because it does not exist");
         }
 
-        context.removeBookmark(username, groupName, bookmarkUrl);
+        CONTEXT.removeBookmark(username, groupName, bookmarkUrl);
 
         return true;
     }
@@ -89,9 +93,9 @@ public class BookmarkManager implements BookmarkHandler {
         List<Bookmark> bookmarks;
 
         if (groupName.isPresent()) {
-            bookmarks = context.getBookmarks(username, groupName.get());
+            bookmarks = CONTEXT.getBookmarks(username, groupName.get());
         } else {
-            bookmarks = context.getBookmarks(username);
+            bookmarks = CONTEXT.getBookmarks(username);
         }
         return bookmarks;
     }
@@ -102,10 +106,10 @@ public class BookmarkManager implements BookmarkHandler {
         Validator.validateListNotEmpty(strings, "Search strings cannot be empty");
 
         return switch (searchType) {
-            case TAG -> context.searchByTag(username, strings);
+            case TAG -> CONTEXT.searchByTag(username, strings);
             case TITLE -> {
                 Validator.validateListSize(strings, 1, "Search strings cannot be empty");
-                yield context.searchByTitle(username, strings.get(0));
+                yield CONTEXT.searchByTitle(username, strings.get(0));
             }
         };
     }
@@ -114,7 +118,7 @@ public class BookmarkManager implements BookmarkHandler {
     public boolean cleanUp(String username) {
         Validator.validateString(username, "Username cannot be null or empty");
 
-        context.cleanUp(username);
+        CONTEXT.cleanUp(username);
 
         return true;
     }
@@ -123,15 +127,16 @@ public class BookmarkManager implements BookmarkHandler {
     public boolean importFromChrome(String username) {
         Validator.validateString(username, "Username cannot be null or empty");
 
-        context.importFromChrome(username);
+        CONTEXT.importFromChrome(username);
 
         return true;
     }
-    private Bookmark getBookmark(String url){
+
+    private Bookmark getBookmark(String url) {
         return Bookmark.of(url);
     }
 
     String shorten(String url) {
-        return shortener.shorten(url);
+        return SHORTENER.shorten(url);
     }
 }

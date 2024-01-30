@@ -1,6 +1,7 @@
 package bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.external.bitly;
 
 import bg.sofia.uni.fmi.mjt.project.bookmarks.exceptions.ShortenException;
+import com.github.shyiko.dotenv.DotEnv;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -12,7 +13,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 public class UrlSortener implements Shortener {
-    private static final String BITLY_TOKEN = System.getenv("BITLY_TOKEN");
+    private static final String BITLY_TOKEN = DotEnv.load().get("BITLY_TOKEN");
     private static final String ROOT_BITLY = "https://api-ssl.bitly.com/v4/shorten";
     private static final String LONGURL = "long_url";
     @Override

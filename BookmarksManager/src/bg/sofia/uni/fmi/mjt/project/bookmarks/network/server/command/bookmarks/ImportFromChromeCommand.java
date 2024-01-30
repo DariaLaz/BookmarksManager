@@ -1,7 +1,6 @@
 package bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.bookmarks;
 
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.Response;
-import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.Command;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.CommandType;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.handlers.sessions.SessionManager;
 
@@ -15,7 +14,7 @@ public class ImportFromChromeCommand extends BookmarkCommand {
     public Response execute() {
         try {
             String username = SessionManager.getUsername(getSessionId());
-            if (bookmarkHandler.importFromChrome(username)) {
+            if (BOOKMARK_HANDLER.importFromChrome(username)) {
                 return new Response("Successfully imported from Chrome", true, getSessionId(), getCommand());
             }
         } catch (Exception e) {
