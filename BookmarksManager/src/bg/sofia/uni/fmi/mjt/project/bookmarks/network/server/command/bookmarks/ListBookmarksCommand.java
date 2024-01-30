@@ -10,7 +10,6 @@ import com.google.gson.Gson;
 import java.util.Optional;
 
 public class ListBookmarksCommand extends BookmarkCommand{
-    private static final Gson GSON = new Gson();
     public ListBookmarksCommand(CommandType command, String[] arguments, String sessionId) {
         super(command, arguments, sessionId);
     }

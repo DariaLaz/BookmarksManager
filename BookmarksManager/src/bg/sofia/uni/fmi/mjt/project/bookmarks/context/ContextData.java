@@ -4,6 +4,10 @@ import bg.sofia.uni.fmi.mjt.project.bookmarks.exceptions.AuthException;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.models.Bookmark;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.models.Group;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.models.User;
+import bg.sofia.uni.fmi.mjt.project.bookmarks.network.Response;
+import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.HttpHandler;
+import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.external.chrome.BookmarksExtractor;
+import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.external.chrome.GoogleChromeExtractor;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.helpers.security.Hash;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.helpers.security.PasswordHash;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.helpers.validation.Validator;
@@ -31,6 +35,7 @@ public class ContextData extends Context {
     private static final Gson GSON = new Gson();
     private static final String ROOT = "D:\\github\\BookmarksManager\\BookmarksManager\\src\\bg\\sofia\\uni\\fmi\\mjt\\project\\bookmarks\\network\\server\\data\\";
     private static final String USERS_FILE = ROOT + "users.txt";
+    private static final BookmarksExtractor BOOKMARKS_EXTRACTOR = new GoogleChromeExtractor();
 
 
     private ContextData() {
@@ -235,19 +240,7 @@ public class ContextData extends Context {
             return bookmark;
         }
 
-        String path = ROOT + "bookmarks\\" + username + "\\" + groupName + ".txt";
-
-        try (Reader reader = new FileReader(path)) {
-            String line;
-            while ((line = new BufferedReader(reader).readLine()) != null && !line.isBlank()) {
-                Bookmark b = GSON.fromJson(line, Bookmark.class);
-                if (group.getBookmarks().stream().noneMatch(book -> book.url().equals(b.url()))) {
-                    group.addBookmark(b);
-                }
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        updateGroup(username, groupName);
 
         return group.getBookmarks().stream().filter(b -> b.url().equals(url)).findFirst().orElse(null);
     }
@@ -318,5 +311,116 @@ public class ContextData extends Context {
         });
 
         return bookmarks;
+    }
+
+    @Override
+    public List<Bookmark> searchByTag(String username, List<String> strings) {
+        List<Bookmark> bookmarks = getBookmarks(username);
+        List<Bookmark> result = new ArrayList<>();
+
+        bookmarks.forEach(bookmark -> {
+            if (containsAnyKeyword(bookmark, strings)) {
+                result.add(bookmark);
+            }
+        });
+
+        return result;
+    }
+    private boolean containsAnyKeyword(Bookmark bookmark, List<String> keywords){
+        for (String keyword : keywords) {
+            if (containsKeyword(bookmark, keyword)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean containsKeyword(Bookmark bookmark, String kw) {
+        return bookmark.keyWords().stream().anyMatch(keyword -> keyword.equals(kw));
+    }
+
+
+    @Override
+    public List<Bookmark> searchByTitle(String username, String s) {
+        List<Bookmark> bookmarks = getBookmarks(username);
+        List<Bookmark> result = new ArrayList<>();
+
+        bookmarks.forEach(bookmark -> {
+            if (bookmark.title().contains(s)) {
+                result.add(bookmark);
+            }
+        });
+
+        return result;
+    }
+
+    @Override
+    public void cleanUp(String username) {
+        if (!isRegistered(username)) {
+            throw new AuthException("User " + username + " is not registered");
+        }
+
+        updateGroups(username);
+
+        bookmarkGroups.get(username).forEach(group -> cleanUpGroup(username, group.getName()));
+    }
+
+    @Override
+    public void importFromChrome(String username) {
+        if (!isRegistered(username)) {
+            throw new AuthException("User " + username + " is not registered");
+        }
+
+        if(!isExistingGroup(username, "chrome")){
+            addGroup(username, new Group("chrome"));
+        }
+        List<Bookmark> bookmarks = BOOKMARKS_EXTRACTOR.extract();
+        try (Writer writer = new StringWriter()) {
+            for (Bookmark bookmark : bookmarks) {
+                String line = GSON.toJson(bookmark) + "\n";
+                writer.write(line);
+            }
+            Files.write(Paths.get(ROOT + "bookmarks\\" + username + "\\chrome.txt"), writer.toString().getBytes());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void cleanUpGroup(String username, String groupName){
+        if (!isRegistered(username)) {
+            throw new AuthException("User " + username + " is not registered");
+        }
+
+        updateGroup(username, groupName);
+        Group group = getGroup(username, groupName);
+        List<Bookmark> bookmarks = group.getBookmarks();
+        List<Bookmark> result = new ArrayList<>();
+
+        bookmarks.forEach(bookmark -> {
+            if (isValidUrl(bookmark.url())) {
+                result.add(bookmark);
+            }
+        });
+
+        String path = ROOT + "bookmarks\\" + username + "\\" + groupName + ".txt";
+
+        try (Writer writer = new StringWriter()) {
+            for (Bookmark bookmark : result) {
+                String line = GSON.toJson(bookmark) + "\n";
+                writer.write(line);
+            }
+            Files.write(Paths.get(path), writer.toString().getBytes());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    boolean isValidUrl(String url){
+        try {
+            return HttpHandler.checkIfValidUrl(url);
+        } catch (IOException e) {
+            return false;
+        }
     }
 }

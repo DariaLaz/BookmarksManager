@@ -5,6 +5,9 @@ import bg.sofia.uni.fmi.mjt.project.bookmarks.context.ContextData;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.exceptions.AlreadyExistingException;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.models.Bookmark;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.models.Group;
+import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.bookmarks.SearchType;
+import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.external.bitly.Shortener;
+import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.external.bitly.UrlSortener;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.handlers.sessions.SessionManager;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.helpers.validation.Validator;
 
@@ -14,6 +17,7 @@ import java.util.Optional;
 public class BookmarkManager implements BookmarkHandler {
     private static BookmarkManager INSTANCE = null;
     protected static final ContextBookmarks context = ContextData.getInstance();
+    private static final Shortener shortener = new UrlSortener();
     private static final Validator VALIDATOR = new Validator();
 
     private BookmarkManager() {
@@ -92,13 +96,42 @@ public class BookmarkManager implements BookmarkHandler {
         return bookmarks;
     }
 
+    @Override
+    public List<Bookmark> search(String username, SearchType searchType, List<String> strings) {
+        Validator.validateString(username, "Username cannot be null or empty");
+        Validator.validateListNotEmpty(strings, "Search strings cannot be empty");
+
+        return switch (searchType) {
+            case TAG -> context.searchByTag(username, strings);
+            case TITLE -> {
+                Validator.validateListSize(strings, 1, "Search strings cannot be empty");
+                yield context.searchByTitle(username, strings.get(0));
+            }
+        };
+    }
+
+    @Override
+    public boolean cleanUp(String username) {
+        Validator.validateString(username, "Username cannot be null or empty");
+
+        context.cleanUp(username);
+
+        return true;
+    }
+
+    @Override
+    public boolean importFromChrome(String username) {
+        Validator.validateString(username, "Username cannot be null or empty");
+
+        context.importFromChrome(username);
+
+        return true;
+    }
     private Bookmark getBookmark(String url){
-        //ToDo implement
         return Bookmark.of(url);
     }
 
     String shorten(String url) {
-        //ToDo implement
-        return url;
+        return shortener.shorten(url);
     }
 }

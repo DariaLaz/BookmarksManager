@@ -45,9 +45,9 @@ public class CommandExecutor {
             case ADD -> new CommandDetails(ADD, args, sessionId);
             case REMOVE -> new CommandDetails(REMOVE, args, sessionId);
             case LIST -> new CommandDetails(LIST, args, sessionId);
-            case SEARCH -> null;
-            case CLEANUP -> null;
-            case IMPORT -> null;
+            case SEARCH -> new CommandDetails(SEARCH, args, sessionId);
+            case CLEANUP -> new CommandDetails(CLEANUP, args, sessionId);
+            case IMPORT -> new CommandDetails(IMPORT, args, sessionId);
             default -> new CommandDetails("Unknown command", null, sessionId);
         };
 

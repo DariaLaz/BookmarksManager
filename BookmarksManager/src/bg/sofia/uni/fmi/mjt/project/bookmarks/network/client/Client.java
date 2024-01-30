@@ -10,12 +10,13 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 public class Client {
     private final int port;
     private final String host;
-    private static final int BUFFER_SIZE = 512;
+    private static final int BUFFER_SIZE = 10000;
     private static ByteBuffer buffer = ByteBuffer.allocateDirect(BUFFER_SIZE);
     private String sessionId = null;
     private static final Gson GSON = new Gson();
@@ -62,7 +63,6 @@ public class Client {
                     break;
                 }
 
-//                System.out.println("Sending message <" + message + "> to the server...");
                 Request request = new Request(message, sessionId);
                 buffer.clear(); // switch to writing mode
                 buffer.put(GSON.toJson(request).getBytes()); // buffer fill
@@ -75,7 +75,7 @@ public class Client {
 
                 byte[] byteArray = new byte[buffer.remaining()];
                 buffer.get(byteArray);
-                String reply = new String(byteArray, "UTF-8"); // buffer drain
+                String reply = new String(byteArray, StandardCharsets.UTF_8); // buffer drain
 
                 Response response = GSON.fromJson(reply, Response.class);
                 handleResponse(response);

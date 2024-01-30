@@ -1,24 +1,23 @@
 package bg.sofia.uni.fmi.mjt.project.bookmarks.models;
 
+import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.external.Jsoup.PageExtractor;
+import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.external.Jsoup.WebPageExtractor;
+
+import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 public record Bookmark(String title,
                        String url,
-                       Map<String, Integer> keyWords) { // word -> count
+                       List<String> keyWords) { // word -> count
     public static Bookmark of(String url) {
-        return new Bookmark(getTitle(url), url, getKeyWords(url));
+        try {
+            PageExtractor webPageExtractor = new WebPageExtractor(url);
+            return new Bookmark(webPageExtractor.title(), url, webPageExtractor.keywords());
+        } catch (IOException e) {
+            return new Bookmark(null, url, null);
+        }
     }
 
-    private static Map<String, Integer> getKeyWords(String url) {
-        //todo implement
-        return Map.of("fmi", 1,
-                      "sofia", 2,
-                      "sliven", 3
-        );
-    }
 
-    private static String getTitle(String url) {
-        //todo implement
-        return "title";
-    }
 }

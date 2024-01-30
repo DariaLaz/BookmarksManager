@@ -16,4 +16,12 @@ public interface ContextBookmarks {
     List<Bookmark> getBookmarks(String username, String s);
 
     List<Bookmark> getBookmarks(String username);
+
+    List<Bookmark> searchByTag(String username, List<String> strings);
+
+    List<Bookmark> searchByTitle(String username, String s);
+
+    void cleanUp(String username);
+
+    void importFromChrome(String username);
 }

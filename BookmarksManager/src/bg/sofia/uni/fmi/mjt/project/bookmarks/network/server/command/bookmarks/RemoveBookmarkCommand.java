@@ -18,7 +18,11 @@ public class RemoveBookmarkCommand extends BookmarkCommand  {
 
     String getBookmarkUrl() {
         try {
-            return getArguments()[1];
+            var url = getArguments()[1];
+            if (!url.startsWith("http://") && !url.startsWith("https://")) {
+                url = "https://" + url;
+            }
+            return url;
         } catch (ArrayIndexOutOfBoundsException e) {
             throw new IllegalArgumentException("Bookmark url is required");
         }
