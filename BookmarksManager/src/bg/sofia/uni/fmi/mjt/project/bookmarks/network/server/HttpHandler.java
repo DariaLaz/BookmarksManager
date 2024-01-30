@@ -12,6 +12,7 @@ public class HttpHandler {
         } catch (Exception e) {
             return false;
         }
+
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("HEAD");
         int responseCode = connection.getResponseCode();

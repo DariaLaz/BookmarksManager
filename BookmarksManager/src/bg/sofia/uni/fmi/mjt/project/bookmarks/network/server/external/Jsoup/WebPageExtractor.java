@@ -14,8 +14,8 @@ public class WebPageExtractor implements PageExtractor {
     private static final int COUNT = 10;
     private static final Set<String> IGNORE = Set.of("", "a", "an", "and", "are", "as", "at", "be", "by",
             "for", "from", "has", "he", "in", "is", "it", "its", "of", "on", "that", "the", "to", "was", "were",
-            "will", "with",  "www", "com", "org", "net", "info", "edu", "gov", "mil", "int", "co", "uk",
-            "...", ",", ".", "!", "?", "(", ")", "[", "]", "{", "}", "-", "–", "—", ":", ";", "\"", "'", "’", "“");
+            "will", "with", "...", ",", ".", "!", "?", "(", ")", "[", "]", "{", "}", "-", "–", "—", ":", ";",
+            "\"", "'", "’", "“");
     public WebPageExtractor(String url) throws IOException {
         this.doc = Jsoup.connect(url).get();
     }

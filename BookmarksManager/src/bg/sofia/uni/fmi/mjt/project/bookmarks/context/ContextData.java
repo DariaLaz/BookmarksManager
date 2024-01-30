@@ -19,6 +19,7 @@ import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,8 +33,7 @@ public class ContextData extends Context {
     private static final Hash PASSWORD_HASHER = new PasswordHash();
     private static Context instance = null;
     private static final Gson GSON = new Gson();
-    private static final String ROOT =
-            "D:\\github\\BookmarksManager\\BookmarksManager\\src\\bg\\sofia\\uni\\fmi\\mjt\\project\\bookmarks\\network\\server\\data\\";
+    private static final String ROOT = "src\\bg\\sofia\\uni\\fmi\\mjt\\project\\bookmarks\\network\\server\\data\\";
     private static final String USERS_FILE = ROOT + "users.txt";
     private static final BookmarksExtractor BOOKMARKS_EXTRACTOR = new GoogleChromeExtractor();
 
@@ -63,7 +63,8 @@ public class ContextData extends Context {
         if (getRegisteredUsers().containsKey(username)) {
             return getRegisteredUsers().get(username);
         }
-        try (Reader reader = new FileReader(USERS_FILE)) {
+        Path path = Paths.get(USERS_FILE).toAbsolutePath();
+        try (Reader reader = new FileReader(path.toFile())) {
             load(reader);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -93,8 +94,10 @@ public class ContextData extends Context {
         String line = username + " " + hashedPassword + " " + id + "\n";
         try (Writer writer = new StringWriter()) {
             writer.write(line);
-            Files.write(Paths.get(USERS_FILE), writer.toString().getBytes(), java.nio.file.StandardOpenOption.APPEND);
-            Files.createDirectories(Paths.get(ROOT + "bookmarks\\" + username));
+            Path path = Paths.get(USERS_FILE);
+            Files.write(path, writer.toString().getBytes(), java.nio.file.StandardOpenOption.APPEND);
+            Path newPath = Paths.get(ROOT + "bookmarks\\" + username).toAbsolutePath();
+            Files.createDirectories(newPath);
             registeredUsers.put(username, new User(username, hashedPassword));
             bookmarkGroups.put(username, new ArrayList<>());
         } catch (Exception e) {
@@ -141,7 +144,8 @@ public class ContextData extends Context {
     public void addGroup(String username, Group group) {
         Validator.validateString(username, "Username cannot be null or empty");
         try {
-            Files.createFile(Paths.get(ROOT + "bookmarks\\" + username + "\\" + group.getName() + ".txt"));
+            Path path = Paths.get(ROOT + "bookmarks\\" + username + "\\" + group.getName() + ".txt").toAbsolutePath();
+            Files.createFile(path);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -171,7 +175,7 @@ public class ContextData extends Context {
     }
 
     private void updateGroups(String username) {
-        String path = ROOT + "bookmarks\\" + username;
+        String path = getBookmarkPath(username);
         try {
             Files.walk(Paths.get(path)).forEach(filePath -> {
                 if (Files.isRegularFile(filePath)) {
@@ -187,7 +191,7 @@ public class ContextData extends Context {
     }
 
     private void updateGroup(String username, String groupName) {
-        String path = ROOT + "bookmarks\\" + username + "\\" + groupName + ".txt";
+        String path = getBookmarkPath(username, groupName);
         String line;
         try (Reader reader = new FileReader(path);
              var r = new BufferedReader(reader);) {
@@ -220,10 +224,12 @@ public class ContextData extends Context {
         }
 
         try {
-            addNewBookmark(bookmark, ROOT + "bookmarks\\" + username + "\\" + groupName + ".txt");
+            Path path = Paths.get(ROOT + "bookmarks\\" + username + "\\" + groupName + ".txt").toAbsolutePath();
+            addNewBookmark(bookmark, path.toString());
             group.addBookmark(bookmark);
         } catch (Exception e) {
             throw new RuntimeException(e);
+
         }
     }
 
@@ -272,7 +278,7 @@ public class ContextData extends Context {
 
         group.removeBookmark(bookmarkUrl);
 
-        String path = ROOT + "bookmarks\\" + username + "\\" + groupName + ".txt";
+        String path = getBookmarkPath(username, groupName);
         try (Writer writer = new StringWriter()) {
             Files.write(Paths.get(path), writer.toString().getBytes());
         } catch (IOException e) {
@@ -410,7 +416,7 @@ public class ContextData extends Context {
             }
         });
 
-        String path = ROOT + "bookmarks\\" + username + "\\" + groupName + ".txt";
+        String path = getBookmarkPath(username, groupName);
 
         try (Writer writer = new StringWriter()) {
             for (Bookmark bookmark : result) {
@@ -422,6 +428,15 @@ public class ContextData extends Context {
             throw new RuntimeException(e);
         }
 
+    }
+
+    private String getBookmarkPath(String username, String groupName) {
+        return Paths.get(ROOT + "bookmarks\\" + username + "\\" + groupName + ".txt")
+                .toAbsolutePath().toString();
+    }
+
+    private String getBookmarkPath(String username) {
+        return Paths.get(ROOT + "bookmarks\\" + username).toAbsolutePath().toString();
     }
 
     boolean isValidUrl(String url) {
