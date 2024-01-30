@@ -21,6 +21,7 @@ public class CommandExecutor {
     private static final String SEARCH = "search";
     private static final String CLEANUP = "cleanup";
     private static final String IMPORT = "import-from-chrome";
+    private static final String EXIT = "exit";
 
     private static CommandDetails parse(Request request) throws UnknownCommand {
         if (request == null) {
@@ -48,6 +49,7 @@ public class CommandExecutor {
             case SEARCH -> new CommandDetails(SEARCH, args, sessionId);
             case CLEANUP -> new CommandDetails(CLEANUP, args, sessionId);
             case IMPORT -> new CommandDetails(IMPORT, args, sessionId);
+            case EXIT -> new CommandDetails(EXIT, args, sessionId);
             default -> new CommandDetails("Unknown command", null, sessionId);
         };
 

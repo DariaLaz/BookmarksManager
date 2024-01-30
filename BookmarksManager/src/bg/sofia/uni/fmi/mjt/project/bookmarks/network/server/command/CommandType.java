@@ -11,6 +11,7 @@ public enum CommandType {
     SEARCH("search"),
     CLEANUP("cleanup"),
     IMPORT("import-from-chrome"),
+    EXIT("exit"),
     UNKNOWN_COMMAND("Unknown command");
 
 

@@ -59,6 +59,10 @@ public class Client {
                 List<Bookmark> bookmarks = Arrays.stream(GSON.fromJson(response.message(), Bookmark[].class)).toList();
                 return listResultToString(bookmarks);
             }
+            case EXIT: {
+                isRunning = false;
+                return response.message();
+            }
             default: return response.message();
         }
     }

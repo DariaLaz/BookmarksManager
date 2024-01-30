@@ -24,6 +24,7 @@ public class CommandFactory {
             case SEARCH -> new SearchBookmarksCommand(command, arguments, sessionId);
             case CLEANUP -> new CleanupCommand(command, arguments, sessionId);
             case IMPORT -> new ImportFromChromeCommand(command, arguments, sessionId);
+            case EXIT -> new ExitCommand(command, arguments, sessionId);
             default -> new UnknownCommand(command, arguments, sessionId);
         };
     }
