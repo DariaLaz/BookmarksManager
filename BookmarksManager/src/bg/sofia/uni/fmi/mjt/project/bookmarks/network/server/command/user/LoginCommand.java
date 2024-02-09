@@ -1,5 +1,6 @@
 package bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.user;
 
+import bg.sofia.uni.fmi.mjt.project.bookmarks.context.Logger;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.exceptions.AlreadyExistingException;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.CommandType;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.Response;
@@ -34,6 +35,7 @@ public class LoginCommand extends UserCommand {
         try {
             return getArguments()[1];
         } catch (ArrayIndexOutOfBoundsException e) {
+            LOGGER.log(e);
             throw new UnvalidParams("Password is required");
         }
     }

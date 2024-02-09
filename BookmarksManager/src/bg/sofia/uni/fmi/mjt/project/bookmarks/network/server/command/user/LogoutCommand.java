@@ -13,6 +13,7 @@ public class LogoutCommand extends UserCommand {
         if (SESSION.logout(getSessionId())) {
             return new Response("Successfully logged out", true, null, getCommand());
         }
+
         return new Response("Something went wrong. Try again!", false, null, getCommand());
     }
 

@@ -1,5 +1,7 @@
 package bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command;
 
+import bg.sofia.uni.fmi.mjt.project.bookmarks.context.Logger;
+import bg.sofia.uni.fmi.mjt.project.bookmarks.exceptions.AuthException;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.exceptions.UnknownCommand;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.Request;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.Response;
@@ -37,6 +39,15 @@ public class CommandExecutor {
         CommandType command = CommandType.of(params.get(0));
         var args = params.subList(1, params.size()).toArray(String[]::new);
         String sessionId = request.sessionId();
+
+        if ((command.equals(CommandType.REGISTER) || command.equals(CommandType.LOGIN))) {
+            if(sessionId != null)
+                throw new AuthException("You should not be logged in for this option!");
+        }
+        else {
+            if(sessionId == null)
+                throw new AuthException("You should be logged in for this option!");
+        }
 
         return switch (command) {
             case REGISTER -> new CommandDetails(REGISTER, args, sessionId);

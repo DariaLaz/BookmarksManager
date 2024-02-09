@@ -20,7 +20,7 @@ public class Client {
     private final int port;
     private final String host;
     private static final int BUFFER_SIZE = 10000;
-    private static ByteBuffer buffer = ByteBuffer.allocateDirect(BUFFER_SIZE);
+    private static final ByteBuffer BUFFER = ByteBuffer.allocateDirect(BUFFER_SIZE);
     private String sessionId = null;
     private static final Gson GSON = new Gson();
     private boolean isRunning = true;
@@ -94,22 +94,21 @@ public class Client {
                 String message = scanner.nextLine();
 
                 Request request = new Request(message, sessionId);
-                buffer.clear();
-                buffer.put(GSON.toJson(request).getBytes());
-                buffer.flip();
-                socketChannel.write(buffer);
+                BUFFER.clear();
+                BUFFER.put(GSON.toJson(request).getBytes());
+                BUFFER.flip();
+                socketChannel.write(BUFFER);
 
-                buffer.clear();
-                socketChannel.read(buffer);
-                buffer.flip();
+                BUFFER.clear();
+                socketChannel.read(BUFFER);
+                BUFFER.flip();
 
-                byte[] byteArray = new byte[buffer.remaining()];
-                buffer.get(byteArray);
+                byte[] byteArray = new byte[BUFFER.remaining()];
+                BUFFER.get(byteArray);
                 String reply = new String(byteArray, StandardCharsets.UTF_8); // buffer drain
 
                 handleReply(reply);
             }
-
         } catch (IOException e) {
             throw new UnknownUser(e.getMessage());
         }

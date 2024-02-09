@@ -1,5 +1,7 @@
 package bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.helpers.validation;
 
+import bg.sofia.uni.fmi.mjt.project.bookmarks.exceptions.AuthException;
+
 import java.util.List;
 
 public class Validator {
@@ -28,6 +30,12 @@ public class Validator {
     public static void validateListSize(List<?> strings, int i, String message) {
         if (strings.size() != i) {
             throw new IllegalArgumentException(message);
+        }
+    }
+
+    public static void validateRegistrate(boolean isRegistrated, String message) {
+        if (!isRegistrated) {
+            throw new AuthException(message);
         }
     }
 }

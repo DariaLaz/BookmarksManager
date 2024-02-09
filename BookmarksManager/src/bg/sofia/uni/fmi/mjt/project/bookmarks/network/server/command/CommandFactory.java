@@ -7,6 +7,7 @@ import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.bookmarks.I
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.bookmarks.ListBookmarksCommand;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.bookmarks.RemoveBookmarkCommand;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.bookmarks.SearchBookmarksCommand;
+import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.user.ExitCommand;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.user.LoginCommand;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.user.LogoutCommand;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.user.RegisterCommand;

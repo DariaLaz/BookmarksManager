@@ -1,5 +1,6 @@
 package bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.user;
 
+import bg.sofia.uni.fmi.mjt.project.bookmarks.context.Logger;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.exceptions.AlreadyExistingException;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.CommandType;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.Response;
@@ -33,6 +34,7 @@ public class RegisterCommand extends UserCommand {
                 return new Response("User registered successfully", true, null, getCommand());
             }
         } catch (AlreadyExistingException e) {
+            LOGGER.log(e);
             return new Response(e.getMessage(), false, null, getCommand());
         }
         return new Response("Something went wrong. Try again!", false, null, getCommand());

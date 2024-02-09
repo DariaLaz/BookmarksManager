@@ -1,5 +1,6 @@
 package bg.sofia.uni.fmi.mjt.project.bookmarks.network.server;
 
+import bg.sofia.uni.fmi.mjt.project.bookmarks.context.Logger;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.Request;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.CommandExecutor;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.Response;
@@ -47,8 +48,9 @@ public class Server {
 
                 handleKeys(keyIterator);
             }
-        } catch (java.io.IOException e) {
-            System.out.println("There was a problem with the server socket");
+        } catch (IOException e) {
+            Logger.getInstance().log(e);
+            System.out.println("There was a problem with the server");
         }
     }
 
@@ -87,6 +89,7 @@ public class Server {
             return true;
         } catch (UnknownCommand e) {
             writeClientOutput(clientChannel, e.getMessage());
+            Logger.getInstance().log(e);
             return false;
         }
     }
