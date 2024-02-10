@@ -1,10 +1,10 @@
 package bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.user;
 
-import bg.sofia.uni.fmi.mjt.project.bookmarks.context.Logger;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.exceptions.AlreadyExistingException;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.CommandType;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.Response;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.exceptions.UnvalidParams;
+import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.helpers.messages.Messages;
 
 public class LoginCommand extends UserCommand {
     public LoginCommand(CommandType command, String[] arguments, String sessionId) {
@@ -15,19 +15,20 @@ public class LoginCommand extends UserCommand {
     public Response execute() {
         try {
             if (SESSION.login(getUsername(), getPassword())) {
-                return new Response("Successfully logged in", true, SESSION.getSessionID(getUsername()), CommandType.LOGIN);
+                return new Response(Messages.SUCCESSFUL_LOGIN, true,
+                        SESSION.getSessionID(getUsername()), CommandType.LOGIN);
             }
         } catch (AlreadyExistingException e) {
-            return new Response(e.getMessage(), false, null, getCommand());
+            return new Response(e.getMessage(), false, getSessionId(), getCommand());
         }
-        return new Response("Wrong username or password", false, null, getCommand());
+        return new Response(Messages.WRONG_USERNAME_OR_PASSWORD, false, getSessionId(), getCommand());
     }
 
     public String getUsername() {
         try {
             return getArguments()[0];
         } catch (ArrayIndexOutOfBoundsException e) {
-            throw new UnvalidParams("Username is required");
+            throw new UnvalidParams(Messages.USERNAME_REQUIRED);
         }
     }
 
@@ -36,7 +37,7 @@ public class LoginCommand extends UserCommand {
             return getArguments()[1];
         } catch (ArrayIndexOutOfBoundsException e) {
             LOGGER.log(e);
-            throw new UnvalidParams("Password is required");
+            throw new UnvalidParams(Messages.PASSWORD_REQUIRED);
         }
     }
 }

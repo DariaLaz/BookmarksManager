@@ -2,6 +2,7 @@ package bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.handlers.sessions;
 
 import bg.sofia.uni.fmi.mjt.project.bookmarks.context.ContextUsers;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.context.ContextData;
+import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.helpers.messages.Messages;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.helpers.security.Hash;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.helpers.security.PasswordHash;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.helpers.validation.Validator;
@@ -15,13 +16,10 @@ import java.util.UUID;
 public class SessionManager implements SessionHandler {
     private static final Map<String, String> ACTIVE_SESSIONS = new HashMap<>(); // username -> sessionID
     private static final Hash PASSWORD_HASHER = new PasswordHash();
-    private static final Validator VALIDATOR = new Validator();
     protected static final ContextUsers CONTEXT = ContextData.getInstance();
 
     private static SessionHandler instance = null;
-    private SessionManager() {
-
-    }
+    private SessionManager() { }
 
     public static SessionHandler getInstance() {
         if (instance == null) {
@@ -40,7 +38,7 @@ public class SessionManager implements SessionHandler {
                 .filter(e -> e.getValue().equals(sessionId))
                 .map(Map.Entry::getKey)
                 .findFirst()
-                .orElseThrow(() -> new UnknownUser("Cannot get username for sessionID " + sessionId));
+                .orElseThrow(() -> new UnknownUser(Messages.SESSION_NOT_FIND));
     }
 
     @Override
@@ -51,16 +49,13 @@ public class SessionManager implements SessionHandler {
     @Override
     public synchronized boolean login(String username, String password) throws AlreadyExistingException {
         if (isLogged(username)) {
-            throw new AlreadyExistingException("Cannot login user " + username + " because they are already logged in");
-        }
-        if (isLogged(username)) {
-            throw new AlreadyExistingException("Cannot check password for logged user " + username);
+            throw new AlreadyExistingException(Messages.ALREADY_LOGGED_IN);
         }
         if (!CONTEXT.isRegistered(username)) {
-            throw new UnknownUser("Cannot login user " + username + " because they are not registered");
+            throw new UnknownUser(String.format(Messages.USER_NOT_REGISTERED, username));
         }
         if (!CONTEXT.isCorrectPassword(username, password)) {
-            throw new IllegalArgumentException("Cannot login user " + username + " because the password is incorrect");
+            throw new IllegalArgumentException(String.format(Messages.USER_PASS_NOT_CORRECT, username));
         }
         String sessionID = UUID.randomUUID().toString();
         setToActiveSessions(username, sessionID);
@@ -69,17 +64,13 @@ public class SessionManager implements SessionHandler {
 
     @Override
     public synchronized boolean logout(String sessionID) {
-        Validator.validateString(sessionID, "You are not logged in. Please login first");
+        Validator.validateString(sessionID, Messages.SHOULD_LOGIN_FIRST);
 
         String username = getActiveSessions().entrySet().stream()
                 .filter(e -> e.getValue().equals(sessionID))
                 .map(Map.Entry::getKey)
                 .findFirst()
-                .orElseThrow(() -> new UnknownUser(
-                        "Cannot logout user with sessionID " + sessionID + " because they are not logged in"));
-        if (!isLogged(username)) {
-            throw new UnknownUser("Cannot logout user " + username + " because they are not logged in");
-        }
+                .orElseThrow(() -> new UnknownUser(Messages.SHOULD_LOGIN_FIRST));
         removeFromActiveSessions(username);
         return true;
     }
@@ -87,8 +78,7 @@ public class SessionManager implements SessionHandler {
     @Override
     public synchronized boolean register(String username, String password) throws AlreadyExistingException {
         if (CONTEXT.isRegistered(username)) {
-            throw new AlreadyExistingException(
-                    "Cannot register user with username " + username + " because it already exists");
+            throw new AlreadyExistingException(Messages.USER_ALREADY_EXISTS);
         }
 
         String hashedPassword = PASSWORD_HASHER.hash(password);

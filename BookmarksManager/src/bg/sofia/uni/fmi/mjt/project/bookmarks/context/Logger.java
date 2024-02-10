@@ -1,7 +1,5 @@
 package bg.sofia.uni.fmi.mjt.project.bookmarks.context;
 
-import bg.sofia.uni.fmi.mjt.project.bookmarks.context.file.FileHandler;
-import bg.sofia.uni.fmi.mjt.project.bookmarks.context.file.FileManager;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.context.file.LoggerFileManager;
 
 public class Logger {

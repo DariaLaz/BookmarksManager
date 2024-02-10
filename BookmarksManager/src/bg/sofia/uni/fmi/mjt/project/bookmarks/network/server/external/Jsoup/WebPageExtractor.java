@@ -12,10 +12,21 @@ import java.util.Set;
 public class WebPageExtractor implements PageExtractor {
     Document doc;
     private static final int COUNT = 10;
-    private static final Set<String> IGNORE = Set.of("", "a", "an", "and", "are", "as", "at", "be", "by",
-            "for", "from", "has", "he", "in", "is", "it", "its", "of", "on", "that", "the", "to", "was", "were",
-            "will", "with", "...", ",", ".", "!", "?", "(", ")", "[", "]", "{", "}", "-", "–", "—", ":", ";",
-            "\"", "'", "’", "“");
+    private static final int START_INDEX = 0;
+    private static final int SUFIX_LEN_2 = 2;
+    private static final int SUFIX_LEN_3 = 3;
+    private static final String EMPTY = "";
+    private static final Set<String> IGNORE = Set.of("i", "me", "my", "myself", "we", "our", "ours", "ourselves",
+            "you", "your", "yours", "yourself", "yourselves", "he", "him", "his", "himself", "she", "her", "hers",
+            "herself", "it", "its", "itself", "they", "them", "their", "theirs", "themselves", "what", "which",
+            "who", "whom", "this", "that", "these", "those", "am", "is", "are", "was", "were", "be", "been", "being",
+            "have", "has", "had", "having", "do", "does", "did", "doing", "a", "an", "the", "and", "but", "if", "or",
+            "because", "until", "while", "against", "between", "into", "through", "during", "before", "after", "above",
+            "below", "up", "down", "in", "out", "off", "over", "under", "again", "further", "then", "once", "here",
+            "there", "when", "where", "why", "how", "all", "any", "both", "each", "few", "more", "most", "other",
+            "some", "such", "no", "nor", "not", "only", "own", "same", "so", "than", "too", "very", "s", "t", "can",
+            "will", "just", "don", "should", "now", "of", "to", "for", "with", "as", "at", "from", "by", "on", "about");
+
     public WebPageExtractor(String url) throws IOException {
         this.doc = Jsoup.connect(url).get();
     }
@@ -52,18 +63,19 @@ public class WebPageExtractor implements PageExtractor {
     }
 
     private String getWord(String word) {
-        //TODO refactor
-        word = word.replace(".", "");
-        if (word.endsWith(",") || word.endsWith(".") || word.endsWith("!")
-                || word.endsWith("?") || word.endsWith(")") || word.endsWith("]") || word.endsWith("}"))
-            word = word.substring(0, word.length() - 1).toLowerCase();
-        if (word.startsWith("\"") || word.startsWith("'") || word.startsWith("“")
-                || word.startsWith("(") || word.startsWith("[") || word.startsWith("{"))
-            word = word.substring(1).toLowerCase();
-        if (word.endsWith("ly") || word.endsWith("ed") || word.endsWith("es"))
-            word = word.substring(0, word.length() - 2).toLowerCase();
-        if (word.endsWith("ing"))
-            word = word.substring(0, word.length() - 3).toLowerCase();
+        String[] toReplace = {".", ",", "!", "?", ")", "]", "}", "(", "[", "{", ":", ";", "-", "\""};
+
+        for (String s : toReplace) {
+            word = word.replace(s, EMPTY);
+        }
+
+        if (word.endsWith("ly") || word.endsWith("ed") || word.endsWith("es")) {
+            word = word.substring(START_INDEX, word.length() - SUFIX_LEN_2).toLowerCase();
+        }
+        if (word.endsWith("ing")) {
+            word = word.substring(START_INDEX, word.length() - SUFIX_LEN_3).toLowerCase();
+        }
+
         return word.toLowerCase();
     }
 }

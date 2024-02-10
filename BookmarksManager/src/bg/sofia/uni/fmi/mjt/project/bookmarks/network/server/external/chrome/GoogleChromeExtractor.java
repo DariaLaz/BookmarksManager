@@ -13,14 +13,12 @@ import java.util.List;
 
 public class GoogleChromeExtractor implements BookmarksExtractor {
     private static final String BOOKMARKS_FILE_PATH =
-            "C:\\Users\\User\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\Bookmarks";
+            "C:\\Users\\Dari\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\Bookmarks";
     private static final Gson GSON = new Gson();
     @Override
     public List<Bookmark> extract() {
         List<Bookmark> bookmarks = new ArrayList<>();
-        String bookmarksFilePath = "C:\\Users\\Dari\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\Bookmarks";
-
-        JsonElement bookmarksJson = parseBookmarksFile(bookmarksFilePath);
+        JsonElement bookmarksJson = parseBookmarksFile(BOOKMARKS_FILE_PATH);
 
         if (bookmarksJson == null) {
             return bookmarks;

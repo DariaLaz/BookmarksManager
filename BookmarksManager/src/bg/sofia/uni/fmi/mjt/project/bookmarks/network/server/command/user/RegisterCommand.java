@@ -1,10 +1,10 @@
 package bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.user;
 
-import bg.sofia.uni.fmi.mjt.project.bookmarks.context.Logger;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.exceptions.AlreadyExistingException;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.CommandType;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.Response;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.exceptions.UnvalidParams;
+import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.helpers.messages.Messages;
 
 public class RegisterCommand extends UserCommand {
     public RegisterCommand(CommandType command, String[] arguments, String sessionId) {
@@ -15,7 +15,7 @@ public class RegisterCommand extends UserCommand {
         try {
             return getArguments()[0];
         } catch (ArrayIndexOutOfBoundsException e) {
-            throw new UnvalidParams("Username is required");
+            throw new UnvalidParams(Messages.USERNAME_REQUIRED);
         }
     }
 
@@ -23,7 +23,7 @@ public class RegisterCommand extends UserCommand {
         try {
             return getArguments()[1];
         } catch (ArrayIndexOutOfBoundsException e) {
-            throw new UnvalidParams("Password is required");
+            throw new UnvalidParams(Messages.PASSWORD_REQUIRED);
         }
     }
 
@@ -31,12 +31,12 @@ public class RegisterCommand extends UserCommand {
     public Response execute() {
         try {
             if (SESSION.register(getUsername(), getPassword())) {
-                return new Response("User registered successfully", true, null, getCommand());
+                return new Response(Messages.SUCCESSFUL_REGISTRATION, true, null, getCommand());
             }
         } catch (AlreadyExistingException e) {
             LOGGER.log(e);
             return new Response(e.getMessage(), false, null, getCommand());
         }
-        return new Response("Something went wrong. Try again!", false, null, getCommand());
+        return new Response(Messages.UNSUCCESSFUL_EXECUTION, false, null, getCommand());
     }
 }

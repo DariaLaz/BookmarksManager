@@ -5,7 +5,6 @@ import bg.sofia.uni.fmi.mjt.project.bookmarks.network.Response;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.handlers.bookmarks.BookmarkHandler;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.handlers.bookmarks.BookmarkManager;
 
-
 public abstract class CommandBase implements Command {
     private final CommandType command;
     private final String[] arguments;

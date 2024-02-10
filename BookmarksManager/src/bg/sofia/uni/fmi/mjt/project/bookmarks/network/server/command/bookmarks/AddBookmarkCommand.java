@@ -1,9 +1,9 @@
 package bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.bookmarks;
 
-import bg.sofia.uni.fmi.mjt.project.bookmarks.context.Logger;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.exceptions.UnknownCommand;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.Response;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.CommandType;
+import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.helpers.messages.Messages;
 
 public class AddBookmarkCommand extends BookmarkCommand {
     public static final int GROUP_NAME_INDEX = 0;
@@ -19,7 +19,7 @@ public class AddBookmarkCommand extends BookmarkCommand {
         try {
             return getArguments()[GROUP_NAME_INDEX];
         } catch (ArrayIndexOutOfBoundsException e) {
-            throw new IllegalArgumentException("Group name is required");
+            throw new IllegalArgumentException(Messages.GROUP_NAME_REQUIRED);
         }
     }
 
@@ -31,7 +31,7 @@ public class AddBookmarkCommand extends BookmarkCommand {
             }
             return url;
         } catch (ArrayIndexOutOfBoundsException e) {
-            throw new IllegalArgumentException("Bookmark url is required");
+            throw new IllegalArgumentException(Messages.BOOKMARK_URL_REQUIRED);
         }
     }
 
@@ -42,19 +42,19 @@ public class AddBookmarkCommand extends BookmarkCommand {
         if (getArguments()[SHORTEN_INDEX].equals(SHORTEN_STR_ARGUMENT)) {
             return true;
         }
-        throw new UnknownCommand("Unknown argument");
+        throw new UnknownCommand(Messages.INVALID_ARGUMENTS);
     }
 
     @Override
     public Response execute() {
         try {
             if (BOOKMARK_HANDLER.addBookmark(getSessionId(), getGroupName(), getBookmarkUrl(), isShorten())) {
-                return new Response("Successfully added bookmark", true, null, getCommand());
+                return new Response(Messages.SUCCESSFUL_ADD_BOOKMARK, true, null, getCommand());
             }
         } catch (Exception e) {
             LOGGER.log(e);
-            return new Response(e.getMessage(), false, null, getCommand());
+            return new Response(e.getMessage(), false, getSessionId(), getCommand());
         }
-        return new Response("Something went wrong. Try again!", false, null, getCommand());
+        return new Response(Messages.UNSUCCESSFUL_EXECUTION, false, getSessionId(), getCommand());
     }
 }

@@ -74,11 +74,39 @@ public interface ContextBookmarks {
      */
     List<Bookmark> getBookmarks(String username);
 
+    /**
+     * Searches for bookmarks for the given user by tag.
+     *
+     * @param username the user whose bookmarks should be searched.
+     * @param strings the keywords to be searched for.
+     *
+     * @return a list of all bookmarks for the given user that match the given keywords.
+     */
     List<Bookmark> searchByTag(String username, List<String> strings);
 
-    List<Bookmark> searchByTitle(String username, String s);
+    /**
+     * Searches for bookmarks for the given user by title.
+     *
+     * @param username the user whose bookmarks should be searched.
+     * @param title the title to be searched for.
+     *
+     * @return a list of all bookmarks for the given user that match fully or partly the given title.
+     */
+    List<Bookmark> searchByTitle(String username, String title);
 
+    /**
+     * Removes all bookmarks that return 404.
+     *
+     * @param username the user whose bookmarks should be cleaned up.
+     *
+     */
     void cleanUp(String username);
 
+    /**
+     * Imports bookmarks from the user's Chrome browser.
+     *
+     * @param username the user whose bookmarks should be imported.
+     *
+     */
     void importFromChrome(String username);
 }

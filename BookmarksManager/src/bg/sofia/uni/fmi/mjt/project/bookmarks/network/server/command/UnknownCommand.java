@@ -1,6 +1,7 @@
 package bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command;
 
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.Response;
+import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.helpers.messages.Messages;
 
 public class UnknownCommand extends CommandBase {
 
@@ -10,6 +11,6 @@ public class UnknownCommand extends CommandBase {
 
     @Override
     public Response execute() {
-        return new Response("Unknown command", false, null, CommandType.UNKNOWN_COMMAND);
+        return new Response(Messages.UNKNOWN_COMMAND, false, null, CommandType.UNKNOWN_COMMAND);
     }
 }

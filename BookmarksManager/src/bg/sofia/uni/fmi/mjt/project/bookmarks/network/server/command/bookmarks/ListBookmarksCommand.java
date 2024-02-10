@@ -1,10 +1,10 @@
 package bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.bookmarks;
 
-import bg.sofia.uni.fmi.mjt.project.bookmarks.context.Logger;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.exceptions.UnknownCommand;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.Response;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.CommandType;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.handlers.sessions.SessionManager;
+import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.helpers.messages.Messages;
 
 import java.util.Optional;
 
@@ -17,13 +17,13 @@ public class ListBookmarksCommand extends BookmarkCommand {
         try {
             if (getArguments().length > 0) {
                 if (!getArguments()[0].equals("--group-name")) {
-                    throw new UnknownCommand("Unknown command");
+                    throw new UnknownCommand(Messages.UNKNOWN_COMMAND);
                 }
                 return Optional.of(getArguments()[1]);
             }
             return Optional.empty();
         } catch (ArrayIndexOutOfBoundsException e) {
-            throw new IllegalArgumentException("Group name is required");
+            throw new IllegalArgumentException(Messages.GROUP_NAME_REQUIRED);
         }
     }
 
@@ -35,7 +35,7 @@ public class ListBookmarksCommand extends BookmarkCommand {
             return new Response(GSON.toJson(bookmarks), true, getSessionId(), getCommand());
         } catch (Exception e) {
             LOGGER.log(e);
-            return new Response(e.getMessage(), false, null, getCommand());
+            return new Response(e.getMessage(), false, getSessionId(), getCommand());
         }
     }
 }

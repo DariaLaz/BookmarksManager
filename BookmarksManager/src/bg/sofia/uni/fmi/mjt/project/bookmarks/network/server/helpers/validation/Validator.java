@@ -1,6 +1,8 @@
 package bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.helpers.validation;
 
 import bg.sofia.uni.fmi.mjt.project.bookmarks.exceptions.AuthException;
+import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.CommandType;
+import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.helpers.messages.Messages;
 
 import java.util.List;
 
@@ -36,6 +38,16 @@ public class Validator {
     public static void validateRegistrate(boolean isRegistrated, String message) {
         if (!isRegistrated) {
             throw new AuthException(message);
+        }
+    }
+
+    public static void validateAuth(CommandType command, String sessionId) {
+        if ((command.equals(CommandType.REGISTER) || command.equals(CommandType.LOGIN))) {
+            if (sessionId != null) {
+                throw new AuthException(Messages.SHOULD_NOT_BE_LOGGED);
+            }
+        } else if (sessionId == null) {
+            throw new AuthException(Messages.SHOULD_LOGIN_FIRST);
         }
     }
 }

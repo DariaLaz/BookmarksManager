@@ -105,7 +105,7 @@ public class Client {
 
                 byte[] byteArray = new byte[BUFFER.remaining()];
                 BUFFER.get(byteArray);
-                String reply = new String(byteArray, StandardCharsets.UTF_8); // buffer drain
+                String reply = new String(byteArray, StandardCharsets.UTF_8);
 
                 handleReply(reply);
             }

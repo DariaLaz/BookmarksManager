@@ -1,8 +1,8 @@
 package bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.bookmarks;
 
-import bg.sofia.uni.fmi.mjt.project.bookmarks.context.Logger;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.Response;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.CommandType;
+import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.helpers.messages.Messages;
 
 public class RemoveBookmarkCommand extends BookmarkCommand  {
     public RemoveBookmarkCommand(CommandType command, String[] arguments, String sessionId) {
@@ -13,7 +13,7 @@ public class RemoveBookmarkCommand extends BookmarkCommand  {
         try {
             return getArguments()[0];
         } catch (ArrayIndexOutOfBoundsException e) {
-            throw new IllegalArgumentException("Group name is required");
+            throw new IllegalArgumentException(Messages.GROUP_NAME_REQUIRED);
         }
     }
 
@@ -25,7 +25,7 @@ public class RemoveBookmarkCommand extends BookmarkCommand  {
             }
             return url;
         } catch (ArrayIndexOutOfBoundsException e) {
-            throw new IllegalArgumentException("Bookmark url is required");
+            throw new IllegalArgumentException(Messages.BOOKMARK_URL_REQUIRED);
         }
     }
 
@@ -33,12 +33,12 @@ public class RemoveBookmarkCommand extends BookmarkCommand  {
     public Response execute() {
         try {
             if (BOOKMARK_HANDLER.removeBookmark(getSessionId(), getGroupName(), getBookmarkUrl())) {
-                return new Response("Successfully removed bookmark", true, null, getCommand());
+                return new Response(Messages.SUCCESSFUL_REMOVE_BOOKMARK, true, null, getCommand());
             }
         } catch (Exception e) {
             LOGGER.log(e);
-            return new Response(e.getMessage(), false, null, getCommand());
+            return new Response(e.getMessage(), false, getSessionId(), getCommand());
         }
-        return new Response("Something went wrong. Try again!", false, null, getCommand());
+        return new Response(Messages.UNSUCCESSFUL_EXECUTION, false, getSessionId(), getCommand());
     }
 }

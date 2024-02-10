@@ -1,6 +1,7 @@
 package bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.external.bitly;
 
 import bg.sofia.uni.fmi.mjt.project.bookmarks.exceptions.ShortenException;
+import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.helpers.messages.Messages;
 import com.github.shyiko.dotenv.DotEnv;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -15,10 +16,10 @@ import java.net.http.HttpResponse;
 public class UrlSortener implements Shortener {
     private static final String BITLY_TOKEN = DotEnv.load().get("BITLY_TOKEN");
     private static final String ROOT_BITLY = "https://api-ssl.bitly.com/v4/shorten";
-    private static final String LONGURL = "long_url";
+    private static final String LONG_URL = "long_url";
     @Override
     public String shorten(String url) {
-        String body = String.format("{ \"%s\": \"%s\" }", LONGURL, url);
+        String body = String.format("{ \"%s\": \"%s\" }", LONG_URL, url);
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(ROOT_BITLY))
@@ -32,7 +33,7 @@ public class UrlSortener implements Shortener {
         try {
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
         } catch (IOException | InterruptedException e) {
-            throw new IllegalArgumentException("Cannot create shortened url.");
+            throw new IllegalArgumentException(Messages.UNSUCCESSFUL_SHORTEN);
         }
 
         switch (response.statusCode()) {
@@ -42,7 +43,7 @@ public class UrlSortener implements Shortener {
             }
 
             default -> {
-                throw new ShortenException("Cannot create shortened url.");
+                throw new ShortenException(Messages.UNSUCCESSFUL_SHORTEN);
             }
         }
     }

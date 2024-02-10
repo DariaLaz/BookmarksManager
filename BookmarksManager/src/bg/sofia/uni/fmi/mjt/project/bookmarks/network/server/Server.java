@@ -64,8 +64,6 @@ public class Server {
 
                 String clientInput = getClientInput(clientChannel);
 
-                System.out.println(clientInput); //TODO remove
-
                 if (clientInput == null || !handleClientInput(clientChannel, clientInput)) {
                     continue;
                 }
