@@ -33,7 +33,7 @@ public class AddGroupCommand extends BookmarkCommand {
                 return new Response(Messages.SUCCESSFUL_ADD_GROUP, true, getSessionId(), CommandType.NEW_GROUP);
             }
         } catch (Exception e) {
-            LOGGER.log(e);
+            LOGGER.log(e, getSessionId());
             return new Response(e.getMessage(), false, getSessionId(), CommandType.NEW_GROUP);
         }
         return new Response(Messages.UNSUCCESSFUL_EXECUTION, false, getSessionId(), CommandType.NEW_GROUP);

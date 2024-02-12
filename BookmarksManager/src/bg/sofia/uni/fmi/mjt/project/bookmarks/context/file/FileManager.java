@@ -8,8 +8,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class FileManager implements FileHandler  {
-    private static final Gson GSON = new Gson();
-
     public static void create(String pathStr) {
         try {
             Path path = Paths.get(pathStr);

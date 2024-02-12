@@ -27,4 +27,8 @@ public class Group {
     public void removeBookmark(String bookmarkUrl) {
         bookmarks.removeIf(bookmark -> bookmark.url().equals(bookmarkUrl));
     }
+
+    public void removeAllBookmarks() {
+        bookmarks.clear();
+    }
 }

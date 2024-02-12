@@ -34,7 +34,7 @@ public class ListBookmarksCommand extends BookmarkCommand {
             var bookmarks = BOOKMARK_HANDLER.listBookmarks(username, getGroupName());
             return new Response(GSON.toJson(bookmarks), true, getSessionId(), getCommand());
         } catch (Exception e) {
-            LOGGER.log(e);
+            LOGGER.log(e, getSessionId());
             return new Response(e.getMessage(), false, getSessionId(), getCommand());
         }
     }

@@ -49,7 +49,7 @@ public class Server {
                 handleKeys(keyIterator);
             }
         } catch (IOException e) {
-            Logger.getInstance().log(e);
+            Logger.getInstance().log(e, null);
             System.out.println("There was a problem with the server");
         }
     }
@@ -87,7 +87,7 @@ public class Server {
             return true;
         } catch (UnknownCommand e) {
             writeClientOutput(clientChannel, e.getMessage());
-            Logger.getInstance().log(e);
+            Logger.getInstance().log(e, null);
             return false;
         }
     }

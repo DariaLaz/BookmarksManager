@@ -26,7 +26,7 @@ public class CleanupCommand extends BookmarkCommand {
                 return new Response(Messages.SUCCESSFUL_CLEANED_UP, true, getSessionId(), getCommand());
             }
         } catch (Exception e) {
-            LOGGER.log(e);
+            LOGGER.log(e, getSessionId());
             return new Response(e.getMessage(), false, getSessionId(), getCommand());
         }
         return new Response(Messages.UNSUCCESSFUL_EXECUTION, false, getSessionId(), getCommand());

@@ -31,7 +31,7 @@ public class SearchBookmarksCommand extends BookmarkCommand {
             String str = GSON.toJson(bookmarks);
             return new Response(str, true, getSessionId(), getCommand());
         } catch (Exception e) {
-            LOGGER.log(e);
+            LOGGER.log(e, getSessionId());
             return new Response(e.getMessage(), false, getSessionId(), getCommand());
         }
     }

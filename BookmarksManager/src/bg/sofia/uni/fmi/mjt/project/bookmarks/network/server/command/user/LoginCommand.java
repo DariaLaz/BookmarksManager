@@ -36,7 +36,7 @@ public class LoginCommand extends UserCommand {
         try {
             return getArguments()[1];
         } catch (ArrayIndexOutOfBoundsException e) {
-            LOGGER.log(e);
+            LOGGER.log(e, getSessionId());
             throw new UnvalidParams(Messages.PASSWORD_REQUIRED);
         }
     }

@@ -306,7 +306,11 @@ public class ContextData extends Context {
 
         updateGroups(username);
 
-        cachedBookmarkGroups().get(username).forEach(group -> cleanUpGroup(username, group.getName()));
+        cachedBookmarkGroups().get(username).forEach(group -> {
+            cleanUpGroup(username, group.getName());
+            updateGroup(username, group.getName());
+        });
+
     }
 
     @Override
@@ -338,6 +342,7 @@ public class ContextData extends Context {
 
         String path = getBookmarkPath(username, groupName);
 
+        GroupsFileManager.clearFile(path);
         GroupsFileManager.appendToFile(path, result);
     }
 

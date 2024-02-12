@@ -42,7 +42,7 @@ public class RegisterCommand extends UserCommand {
                 return new Response(Messages.SUCCESSFUL_REGISTRATION, true, null, getCommand());
             }
         } catch (AlreadyExistingException e) {
-            LOGGER.log(e);
+            LOGGER.log(e, getSessionId());
             return new Response(e.getMessage(), false, null, getCommand());
         }
         return new Response(Messages.UNSUCCESSFUL_EXECUTION, false, null, getCommand());
