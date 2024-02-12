@@ -4,6 +4,7 @@ import bg.sofia.uni.fmi.mjt.project.bookmarks.context.Logger;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.Response;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.handlers.bookmarks.BookmarkHandler;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.handlers.bookmarks.BookmarkManager;
+import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.helpers.validation.Validator;
 
 public abstract class CommandBase implements Command {
     private final CommandType command;
@@ -13,6 +14,8 @@ public abstract class CommandBase implements Command {
     protected static final Logger LOGGER = Logger.getInstance();
 
     public CommandBase(CommandType command, String[] arguments, String sessionId) {
+        Validator.validateAuth(command, sessionId);
+
         this.command = command;
         this.arguments = arguments;
         this.sessionId = sessionId;

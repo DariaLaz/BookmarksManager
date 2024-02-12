@@ -8,6 +8,7 @@ import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.handlers.sessions.S
 import java.util.List;
 
 public class SearchBookmarksCommand extends BookmarkCommand {
+
     public SearchBookmarksCommand(CommandType command, String[] arguments, String sessionId) {
         super(command, arguments, sessionId);
     }

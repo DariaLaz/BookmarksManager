@@ -19,7 +19,7 @@ import java.util.Scanner;
 public class Client {
     private final int port;
     private final String host;
-    private static final int BUFFER_SIZE = 10000;
+    private static final int BUFFER_SIZE = 16384;
     private static final ByteBuffer BUFFER = ByteBuffer.allocateDirect(BUFFER_SIZE);
     private String sessionId = null;
     private static final Gson GSON = new Gson();
@@ -31,9 +31,6 @@ public class Client {
     }
 
     private void setSessionId(String sessionId) {
-        if (sessionId == null) {
-            throw new UnknownUser("Session id is null");
-        }
         this.sessionId = sessionId;
     }
 

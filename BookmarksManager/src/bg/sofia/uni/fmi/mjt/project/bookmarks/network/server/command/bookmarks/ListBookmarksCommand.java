@@ -13,7 +13,7 @@ public class ListBookmarksCommand extends BookmarkCommand {
         super(command, arguments, sessionId);
     }
 
-    Optional<String> getGroupName() throws UnknownCommand {
+    public Optional<String> getGroupName() throws UnknownCommand {
         try {
             if (getArguments().length > 0) {
                 if (!getArguments()[0].equals("--group-name")) {

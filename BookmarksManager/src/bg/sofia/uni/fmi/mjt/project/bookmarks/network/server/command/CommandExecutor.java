@@ -4,7 +4,6 @@ import bg.sofia.uni.fmi.mjt.project.bookmarks.exceptions.UnknownCommand;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.Request;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.Response;
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.helpers.messages.Messages;
-import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.helpers.validation.Validator;
 
 import java.util.Arrays;
 import java.util.function.Predicate;
@@ -33,8 +32,6 @@ public class CommandExecutor {
         CommandType command = CommandType.of(params.get(0));
         var args = params.subList(1, params.size()).toArray(String[]::new);
         String sessionId = request.sessionId();
-
-        Validator.validateAuth(command, sessionId);
 
         return switch (command) {
             case REGISTER -> new CommandDetails(REGISTER, args, sessionId);

@@ -5,26 +5,23 @@ import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.CommandType
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.helpers.messages.Messages;
 
 import java.util.List;
+import java.util.Objects;
 
 public class Validator {
-
-    public Validator() {
-    }
-
     public static void validateNotNull(Object object, String message) {
-        if (object == null) {
+        if (Objects.isNull(object)) {
             throw new IllegalArgumentException(message);
         }
     }
 
     public static void validateString(String string, String message) {
-        if (string == null || string.isBlank()) {
+        if (Objects.isNull(string) || string.isBlank()) {
             throw new IllegalArgumentException(message);
         }
     }
 
     public static void validateListNotEmpty(List<?> list, String message) {
-        if (list == null || list.isEmpty()) {
+        if (Objects.isNull(list) || list.isEmpty()) {
             throw new IllegalArgumentException(message);
         }
     }
@@ -42,6 +39,9 @@ public class Validator {
     }
 
     public static void validateAuth(CommandType command, String sessionId) {
+        if (command.equals(CommandType.EXIT)) {
+            return;
+        }
         if ((command.equals(CommandType.REGISTER) || command.equals(CommandType.LOGIN))) {
             if (sessionId != null) {
                 throw new AuthException(Messages.SHOULD_NOT_BE_LOGGED);

@@ -11,6 +11,13 @@ public class AddBookmarkCommand extends BookmarkCommand {
     public static final int SHORTEN_INDEX = 2;
     public static final String SHORTEN_STR_ARGUMENT = "shorten";
     public static final int MAX_SIZE = 3;
+
+    public void validateArguments() {
+        if (getArguments().length > MAX_SIZE) {
+            throw new IllegalArgumentException(Messages.INVALID_ARGUMENTS);
+        }
+    }
+
     public AddBookmarkCommand(CommandType command, String[] arguments, String sessionId) {
         super(command, arguments, sessionId);
     }
@@ -49,7 +56,7 @@ public class AddBookmarkCommand extends BookmarkCommand {
     public Response execute() {
         try {
             if (BOOKMARK_HANDLER.addBookmark(getSessionId(), getGroupName(), getBookmarkUrl(), isShorten())) {
-                return new Response(Messages.SUCCESSFUL_ADD_BOOKMARK, true, null, getCommand());
+                return new Response(Messages.SUCCESSFUL_ADD_BOOKMARK, true, getSessionId(), getCommand());
             }
         } catch (Exception e) {
             LOGGER.log(e);

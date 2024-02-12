@@ -34,10 +34,6 @@ public class ContextDataTest {
     private static final String USER_ID = "id";
     private static final String USER_RANDOM_NAME = "random";
     private static final String GROUP_NAME = "group";
-
-    public static <T> void resetMockedStatic(MockedStatic<T> mockedStatic) {
-        mockedStatic.close();
-    }
     private Context contextData;
     private final User user = new User(USER_NAME, USER_HASH_PASS, USER_ID);
     @BeforeEach
@@ -48,40 +44,35 @@ public class ContextDataTest {
         contextData.cachedBookmarkGroups().get(USER_NAME).add(new Group(GROUP_NAME));
     }
 
-    //BOOKMARKS FUNCS
     @Test
     void testGetUserWithCachedData() {
         contextData.cachedRegisteredUsers().put(USER_NAME, user);
-
-        assertEquals(user, ((ContextData)contextData).getUser(USER_NAME),
-                "Should return the cached user with the given username");
+        assertEquals(user, ((ContextData)contextData).getUser(USER_NAME),"Should return the cached user with the given username");
     }
     @Test
     void testGetUserWithoutCachedData() {
-        MockedStatic<UserFileManager> ufm = Mockito.mockStatic(UserFileManager.class);
-        ufm.when(() -> UserFileManager.load(Mockito.anyString(), Mockito.anyMap(), Mockito.anyMap()))
-                .then(invocation -> {
-                    Map<String, User> cachedRegisteredUsers = invocation.getArgument(1);
-                    Map<String, ArrayList<Group>> cachedBookmarkGroups = invocation.getArgument(2);
-                    cachedRegisteredUsers.put(USER_NAME, user);
-                    cachedBookmarkGroups.put(USER_NAME, new ArrayList<>());
-                    return null;
-                });
+        try (MockedStatic<UserFileManager> ufm = Mockito.mockStatic(UserFileManager.class)) {
+            ufm.when(() -> UserFileManager.load(Mockito.anyString(), Mockito.anyMap(), Mockito.anyMap()))
+                    .then(invocation -> {
+                        Map<String, User> cachedRegisteredUsers = invocation.getArgument(1);
+                        Map<String, ArrayList<Group>> cachedBookmarkGroups = invocation.getArgument(2);
+                        cachedRegisteredUsers.put(USER_NAME, user);
+                        cachedBookmarkGroups.put(USER_NAME, new ArrayList<>());
+                        return null;
+                    });
 
-        assertEquals(user, ((ContextData)contextData).getUser(USER_NAME),
-                "Should return the user with the given username");
-        resetMockedStatic(ufm);
+            assertEquals(user, ((ContextData)contextData).getUser(USER_NAME),"Should return the user with the given username");
+        }
     }
 
     @Test
     void testGetUserWithNotExistingUser() {
-        MockedStatic<UserFileManager> ufm = mockStatic(UserFileManager.class);
-        ufm.when(() -> UserFileManager.load(Mockito.anyString(), Mockito.anyMap(), Mockito.anyMap()))
-                .then(invocation -> null);
+        try (MockedStatic<UserFileManager> ufm = mockStatic(UserFileManager.class)) {
+            ufm.when(() -> UserFileManager.load(Mockito.anyString(), Mockito.anyMap(), Mockito.anyMap()))
+                    .then(invocation -> null);
 
-        assertNull(((ContextData)contextData).getUser(USER_RANDOM_NAME),
-                "Should return null with not existing user");
-        resetMockedStatic(ufm);
+            assertNull(((ContextData)contextData).getUser(USER_RANDOM_NAME),"Should return null with not existing user");
+        }
     }
 
     @Test
@@ -102,37 +93,36 @@ public class ContextDataTest {
 
     @Test
     void testAddNewUserWithCorrectData() {
-        MockedStatic<UserFileManager> ufm = mockStatic(UserFileManager.class);
-        ufm.when(() -> UserFileManager.addNew(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
-                Mockito.anyMap(), Mockito.anyMap(), Mockito.any(User.class)))
-                .then(invocation ->  null);
-        assertDoesNotThrow(() -> contextData.addNewUser(USER_NAME, USER_HASH_PASS),
-                "Should not throw with correct data");
-        resetMockedStatic(ufm);
+        try (MockedStatic<UserFileManager> ufm = mockStatic(UserFileManager.class)) {
+            ufm.when(() -> UserFileManager.addNew(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
+                            Mockito.anyMap(), Mockito.anyMap(), Mockito.any(User.class)))
+                    .then(invocation ->  null);
+            assertDoesNotThrow(() -> contextData.addNewUser(USER_NAME, USER_HASH_PASS),
+                    "Should not throw with correct data");
+        }
     }
 
     @Test
     void testAddNewUserWithIncorrectData() {
-        MockedStatic<UserFileManager> ufm = mockStatic(UserFileManager.class);
-        ufm.when(() -> UserFileManager.addNew(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
-                        Mockito.anyMap(), Mockito.anyMap(), Mockito.any(User.class)))
-                .then(invocation ->  null);
-        assertThrows(IllegalArgumentException.class, () -> contextData.addNewUser("", ""),
-                "Should throw IllegalArgumentException with null or empty arguments");
-        resetMockedStatic(ufm);
+        try (MockedStatic<UserFileManager> ufm = mockStatic(UserFileManager.class)) {
+            ufm.when(() -> UserFileManager.addNew(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
+                            Mockito.anyMap(), Mockito.anyMap(), Mockito.any(User.class)))
+                    .then(invocation ->  null);
+            assertThrows(IllegalArgumentException.class, () -> contextData.addNewUser("", ""),
+                    "Should throw IllegalArgumentException with null or empty arguments");
+        }
     }
     @Test
     void testIsCorrectPasswordWithNotRegistered() {
-        MockedStatic<UserFileManager> ufm = mockStatic(UserFileManager.class);
-        ufm.when(() -> UserFileManager.load(Mockito.anyString(), Mockito.anyMap(), Mockito.anyMap()))
-                .then(invocation -> null);
+        try (MockedStatic<UserFileManager> ufm = mockStatic(UserFileManager.class)) {
+            ufm.when(() -> UserFileManager.load(Mockito.anyString(), Mockito.anyMap(), Mockito.anyMap()))
+                    .then(invocation -> null);
 
-        Context contextData = ContextData.getInstance();
+            Context contextData = ContextData.getInstance();
 
-        assertFalse(contextData.isCorrectPassword(USER_RANDOM_NAME, USER_PASS),
-                "Should return false then the user is not registered");
-
-        resetMockedStatic(ufm);
+            assertFalse(contextData.isCorrectPassword(USER_RANDOM_NAME, USER_PASS),
+                    "Should return false then the user is not registered");
+        }
     }
 
     @Test
@@ -167,28 +157,27 @@ public class ContextDataTest {
 
     @Test
     void testAddGroupWithCorrectArguments() {
-        MockedStatic<FileManager> ufm = mockStatic(FileManager.class);
-        ufm.when(() -> FileManager.create(Mockito.anyString()))
-                .then(invocation -> null);
-        Group group = new Group(GROUP_NAME);
-        contextData.cachedBookmarkGroups().put(USER_NAME, new ArrayList<>());
-        assertDoesNotThrow(() -> contextData.addGroup(USER_NAME, group),
-                "Should not throw with correct arguments");
-        resetMockedStatic(ufm);
+        try (MockedStatic<FileManager> ufm = mockStatic(FileManager.class)) {
+            ufm.when(() -> FileManager.create(Mockito.anyString()))
+                    .then(invocation -> null);
+            Group group = new Group(GROUP_NAME);
+            contextData.cachedBookmarkGroups().put(USER_NAME, new ArrayList<>());
+            assertDoesNotThrow(() -> contextData.addGroup(USER_NAME, group),"Should not throw with correct arguments");
+        }
     }
 
     @Test
     void testAddGroup() {
-        MockedStatic<FileManager> ufm = mockStatic(FileManager.class);
-        ufm.when(() -> FileManager.create(Mockito.anyString()))
-                .then(invocation -> null);
-        Group group = new Group(GROUP_NAME);
-        contextData.cachedBookmarkGroups().put(USER_NAME, new ArrayList<>());
+        try (MockedStatic<FileManager> ufm = mockStatic(FileManager.class)) {
+            ufm.when(() -> FileManager.create(Mockito.anyString()))
+                    .then(invocation -> null);
+            Group group = new Group(GROUP_NAME);
+            contextData.cachedBookmarkGroups().put(USER_NAME, new ArrayList<>());
 
-        contextData.addGroup(USER_NAME, group);
-        assertTrue(contextData.cachedBookmarkGroups().get(USER_NAME).contains(group),
-                "Should add the group to the user's groups");
-        resetMockedStatic(ufm);
+            contextData.addGroup(USER_NAME, group);
+            assertTrue(contextData.cachedBookmarkGroups().get(USER_NAME).contains(group),
+                    "Should add the group to the user's groups");
+        }
     }
 
     @Test
@@ -209,32 +198,29 @@ public class ContextDataTest {
 
     @Test
     void testIsExistingGroupWithNotExistingGroup() {
-        MockedStatic<GroupsFileManager> cfm = mockStatic(GroupsFileManager.class);
-        cfm.when(() -> GroupsFileManager.updateGroups(Mockito.anyString(), Mockito.anyList()))
-                .then(invocation -> null);
+        try (MockedStatic<GroupsFileManager> cfm = mockStatic(GroupsFileManager.class)) {
+            cfm.when(() -> GroupsFileManager.updateGroups(Mockito.anyString(), Mockito.anyList()))
+                    .then(invocation -> null);
 
-        contextData.cachedRegisteredUsers().put(USER_NAME, new User(USER_NAME, USER_HASH_PASS, USER_ID));
-        contextData.cachedBookmarkGroups().put(USER_NAME, new ArrayList<>());
+            contextData.cachedRegisteredUsers().put(USER_NAME, new User(USER_NAME, USER_HASH_PASS, USER_ID));
+            contextData.cachedBookmarkGroups().put(USER_NAME, new ArrayList<>());
 
-        assertFalse(contextData.isExistingGroup(USER_NAME, GROUP_NAME),
-                "Should return false with not existing group");
-
-        resetMockedStatic(cfm);
+            assertFalse(contextData.isExistingGroup(USER_NAME, GROUP_NAME),
+                    "Should return false with not existing group");
+        }
     }
 
     @Test
     void testIsExistingGroupWithExistingGroup() {
-        MockedStatic<GroupsFileManager> cfm = mockStatic(GroupsFileManager.class);
-        cfm.when(() -> GroupsFileManager.updateGroups(Mockito.anyString(), Mockito.anyList()))
-                .then(invocation -> null);
+        try (MockedStatic<GroupsFileManager> cfm = mockStatic(GroupsFileManager.class)) {
+            cfm.when(() -> GroupsFileManager.updateGroups(Mockito.anyString(), Mockito.anyList()))
+                    .then(invocation -> null);
 
-        contextData.cachedBookmarkGroups().put(USER_NAME, new ArrayList<>());
-        contextData.cachedBookmarkGroups().get(USER_NAME).add(new Group(GROUP_NAME));
+            contextData.cachedBookmarkGroups().put(USER_NAME, new ArrayList<>());
+            contextData.cachedBookmarkGroups().get(USER_NAME).add(new Group(GROUP_NAME));
 
-        assertTrue(contextData.isExistingGroup(USER_NAME, GROUP_NAME),
-                "Should return true with existing group");
-
-        resetMockedStatic(cfm);
+            assertTrue(contextData.isExistingGroup(USER_NAME, GROUP_NAME),"Should return true with existing group");
+        }
     }
 
     @Test
@@ -255,46 +241,46 @@ public class ContextDataTest {
 
     @Test
     void testAddBookmarkWithNotRegistratedUser() {
-        MockedStatic<GroupsFileManager> cfm = mockStatic(GroupsFileManager.class);
-        cfm.when(() -> GroupsFileManager.updateGroup(Mockito.anyString(), Mockito.any(Group.class)))
-                .then(invocation -> null);
+        try (MockedStatic<GroupsFileManager> cfm = mockStatic(GroupsFileManager.class)) {
+            cfm.when(() -> GroupsFileManager.updateGroup(Mockito.anyString(), Mockito.any(Group.class)))
+                    .then(invocation -> null);
 
-        assertThrows(AuthException.class, () -> contextData.addBookmark(USER_RANDOM_NAME, GROUP_NAME, null),
-                "Should throw IllegalArgumentException with not registrated user");
-        resetMockedStatic(cfm);
+            assertThrows(AuthException.class, () -> contextData.addBookmark(USER_RANDOM_NAME, GROUP_NAME, null),
+                    "Should throw IllegalArgumentException with not registrated user");
+        }
     }
 
     @Test
     void testAddBookmarkWithNotExistingGroup() {
-        MockedStatic<GroupsFileManager> cfm = mockStatic(GroupsFileManager.class);
-        cfm.when(() -> GroupsFileManager.updateGroup(Mockito.anyString(), Mockito.any(Group.class)))
-                .then(invocation -> null);
+        try(MockedStatic<GroupsFileManager> cfm = mockStatic(GroupsFileManager.class)){
+            cfm.when(() -> GroupsFileManager.updateGroup(Mockito.anyString(), Mockito.any(Group.class)))
+                    .then(invocation -> null);
 
-        contextData.cachedRegisteredUsers().put(USER_NAME, new User(USER_NAME, USER_HASH_PASS, USER_ID));
-        contextData.cachedBookmarkGroups().put(USER_NAME, new ArrayList<>());
+            contextData.cachedRegisteredUsers().put(USER_NAME, new User(USER_NAME, USER_HASH_PASS, USER_ID));
+            contextData.cachedBookmarkGroups().put(USER_NAME, new ArrayList<>());
 
-        assertThrows(IllegalArgumentException.class, () -> contextData.addBookmark(USER_NAME, USER_RANDOM_NAME, null),
-                "Should throw IllegalArgumentException with not existing group");
-        resetMockedStatic(cfm);
+            assertThrows(IllegalArgumentException.class, () -> contextData.addBookmark(USER_NAME, USER_RANDOM_NAME, null),
+                    "Should throw IllegalArgumentException with not existing group");
+        }
     }
 
     @Test
     void testAddBookmarkWithCorrectData() {
-        MockedStatic<GroupsFileManager> cfm = mockStatic(GroupsFileManager.class);
-        cfm.when(() -> GroupsFileManager.updateGroup(Mockito.anyString(), Mockito.any(Group.class)))
-                .then(invocation -> null);
-        cfm.when(() -> GroupsFileManager.addNewBookmark(Mockito.anyString(), Mockito.anyString()))
-                .then(invocation -> null);
+        try(MockedStatic<GroupsFileManager> cfm = mockStatic(GroupsFileManager.class)){
+            cfm.when(() -> GroupsFileManager.updateGroup(Mockito.anyString(), Mockito.any(Group.class)))
+                    .then(invocation -> null);
+            cfm.when(() -> GroupsFileManager.addNewBookmark(Mockito.anyString(), Mockito.anyString()))
+                    .then(invocation -> null);
 
-        contextData.cachedRegisteredUsers().put(USER_NAME, new User(USER_NAME, USER_HASH_PASS, USER_ID));
-        contextData.cachedBookmarkGroups().put(USER_NAME, new ArrayList<>());
-        contextData.cachedBookmarkGroups().get(USER_NAME).add(new Group(GROUP_NAME));
-        Bookmark bookmark = new Bookmark("url", "title", List.of("tag"));
-        contextData.addBookmark(USER_NAME, GROUP_NAME, bookmark);
+            contextData.cachedRegisteredUsers().put(USER_NAME, new User(USER_NAME, USER_HASH_PASS, USER_ID));
+            contextData.cachedBookmarkGroups().put(USER_NAME, new ArrayList<>());
+            contextData.cachedBookmarkGroups().get(USER_NAME).add(new Group(GROUP_NAME));
+            Bookmark bookmark = new Bookmark("url", "title", List.of("tag"));
+            contextData.addBookmark(USER_NAME, GROUP_NAME, bookmark);
 
-        assertTrue(contextData.cachedBookmarkGroups().get(USER_NAME).get(0).getBookmarks().contains(bookmark),
-                "Should add the bookmark to the group");
-        resetMockedStatic(cfm);
+            assertTrue(contextData.cachedBookmarkGroups().get(USER_NAME).get(0).getBookmarks().contains(bookmark),
+                    "Should add the bookmark to the group");
+        }
     }
 
     @Test
@@ -323,27 +309,27 @@ public class ContextDataTest {
 
     @Test
     void testIsExistingBookmarkWithNotRegistratedUser() {
-        MockedStatic<GroupsFileManager> cfm = mockStatic(GroupsFileManager.class);
-        cfm.when(() -> GroupsFileManager.updateGroup(Mockito.anyString(), Mockito.any(Group.class)))
-                .then(invocation -> null);
+        try(MockedStatic<GroupsFileManager> cfm = mockStatic(GroupsFileManager.class)){
+            cfm.when(() -> GroupsFileManager.updateGroup(Mockito.anyString(), Mockito.any(Group.class)))
+                    .then(invocation -> null);
 
-        assertThrows(AuthException.class, () -> contextData.isExistingBookmark(USER_RANDOM_NAME, GROUP_NAME, "url"),
-                "Should throw IllegalArgumentException with not registrated user");
-        resetMockedStatic(cfm);
+            assertThrows(AuthException.class, () -> contextData.isExistingBookmark(USER_RANDOM_NAME, GROUP_NAME, "url"),
+                    "Should throw IllegalArgumentException with not registrated user");
+        }
     }
 
     @Test
     void testIsExistingBookmarkWithNotExistingGroup() {
-        MockedStatic<GroupsFileManager> cfm = mockStatic(GroupsFileManager.class);
-        cfm.when(() -> GroupsFileManager.updateGroup(Mockito.anyString(), Mockito.any(Group.class)))
-                .then(invocation -> null);
+        try(MockedStatic<GroupsFileManager> cfm = mockStatic(GroupsFileManager.class)){
+            cfm.when(() -> GroupsFileManager.updateGroup(Mockito.anyString(), Mockito.any(Group.class)))
+                    .then(invocation -> null);
 
-        contextData.cachedRegisteredUsers().put(USER_NAME, new User(USER_NAME, USER_HASH_PASS, USER_ID));
-        contextData.cachedBookmarkGroups().put(USER_NAME, new ArrayList<>());
+            contextData.cachedRegisteredUsers().put(USER_NAME, new User(USER_NAME, USER_HASH_PASS, USER_ID));
+            contextData.cachedBookmarkGroups().put(USER_NAME, new ArrayList<>());
 
-        assertThrows(IllegalArgumentException.class, () -> contextData.isExistingBookmark(USER_NAME, GROUP_NAME, "url"),
-                "Should throw IllegalArgumentException with not existing group");
-        resetMockedStatic(cfm);
+            assertThrows(IllegalArgumentException.class, () -> contextData.isExistingBookmark(USER_NAME, GROUP_NAME, "url"),
+                    "Should throw IllegalArgumentException with not existing group");
+        }
     }
 
     @Test
@@ -372,45 +358,45 @@ public class ContextDataTest {
 
     @Test
     void testRemoveBookmarkWithNotRegistratedUser() {
-        MockedStatic<GroupsFileManager> cfm = mockStatic(GroupsFileManager.class);
-        cfm.when(() -> GroupsFileManager.updateGroup(Mockito.anyString(), Mockito.any(Group.class)))
-                .then(invocation -> null);
+        try(MockedStatic<GroupsFileManager> cfm = mockStatic(GroupsFileManager.class)){
+            cfm.when(() -> GroupsFileManager.updateGroup(Mockito.anyString(), Mockito.any(Group.class)))
+                    .then(invocation -> null);
 
-        assertThrows(AuthException.class, () -> contextData.removeBookmark(USER_RANDOM_NAME, GROUP_NAME, "url"),
-                "Should throw IllegalArgumentException with not registrated user");
-        resetMockedStatic(cfm);
+            assertThrows(AuthException.class, () -> contextData.removeBookmark(USER_RANDOM_NAME, GROUP_NAME, "url"),
+                    "Should throw IllegalArgumentException with not registrated user");
+        }
     }
 
     @Test
     void testRemoveBookmarkWithNotExistingGroup() {
-        MockedStatic<GroupsFileManager> cfm = mockStatic(GroupsFileManager.class);
-        cfm.when(() -> GroupsFileManager.updateGroup(Mockito.anyString(), Mockito.any(Group.class)))
-                .then(invocation -> null);
+        try(MockedStatic<GroupsFileManager> cfm = mockStatic(GroupsFileManager.class)){
+            cfm.when(() -> GroupsFileManager.updateGroup(Mockito.anyString(), Mockito.any(Group.class)))
+                    .then(invocation -> null);
 
-        contextData.cachedRegisteredUsers().put(USER_NAME, new User(USER_NAME, USER_HASH_PASS, USER_ID));
-        contextData.cachedBookmarkGroups().put(USER_NAME, new ArrayList<>());
+            contextData.cachedRegisteredUsers().put(USER_NAME, new User(USER_NAME, USER_HASH_PASS, USER_ID));
+            contextData.cachedBookmarkGroups().put(USER_NAME, new ArrayList<>());
 
-        assertThrows(IllegalArgumentException.class, () -> contextData.removeBookmark(USER_NAME, USER_RANDOM_NAME, "url"),
-                "Should throw IllegalArgumentException with not existing group");
-        resetMockedStatic(cfm);
+            assertThrows(IllegalArgumentException.class, () -> contextData.removeBookmark(USER_NAME, USER_RANDOM_NAME, "url"),
+                    "Should throw IllegalArgumentException with not existing group");
+        }
     }
 
     @Test
     void testRemoveBookmarkWithCorrectData() {
-        MockedStatic<GroupsFileManager> cfm = mockStatic(GroupsFileManager.class);
-        cfm.when(() -> GroupsFileManager.updateGroup(Mockito.anyString(), Mockito.any(Group.class)))
-                .then(invocation -> null);
-        cfm.when(() -> GroupsFileManager.removeBookmark(Mockito.anyString(), Mockito.anyString(), Mockito.any(Group.class)))
-                .then(invocation -> null);
+        try(MockedStatic<GroupsFileManager> cfm = mockStatic(GroupsFileManager.class)){
+            cfm.when(() -> GroupsFileManager.updateGroup(Mockito.anyString(), Mockito.any(Group.class)))
+                    .then(invocation -> null);
+            cfm.when(() -> GroupsFileManager.removeBookmark(Mockito.anyString(), Mockito.anyString(), Mockito.any(Group.class)))
+                    .then(invocation -> null);
 
-        Bookmark bookmark = new Bookmark("url", "title", List.of("tag"));
-        contextData.cachedBookmarkGroups().get(USER_NAME).add(new Group("toRemove"));
-        contextData.cachedBookmarkGroups().get(USER_NAME).get(1).addBookmark(bookmark);
-        contextData.removeBookmark(USER_NAME, "toRemove", "url");
+            Bookmark bookmark = new Bookmark("url", "title", List.of("tag"));
+            contextData.cachedBookmarkGroups().get(USER_NAME).add(new Group("toRemove"));
+            contextData.cachedBookmarkGroups().get(USER_NAME).get(1).addBookmark(bookmark);
+            contextData.removeBookmark(USER_NAME, "toRemove", "url");
 
-        assertFalse(contextData.cachedBookmarkGroups().get(USER_NAME).get(0).getBookmarks().contains(bookmark),
-                "Should remove the bookmark from the group");
-        resetMockedStatic(cfm);
+            assertFalse(contextData.cachedBookmarkGroups().get(USER_NAME).get(0).getBookmarks().contains(bookmark),
+                    "Should remove the bookmark from the group");
+        }
     }
 
     @Test
@@ -431,41 +417,41 @@ public class ContextDataTest {
 
     @Test
     void testGetBookmarksWithNotRegistratedUser() {
-        MockedStatic<GroupsFileManager> cfm = mockStatic(GroupsFileManager.class);
-        cfm.when(() -> GroupsFileManager.updateGroup(Mockito.anyString(), Mockito.any(Group.class)))
-                .then(invocation -> null);
+        try(MockedStatic<GroupsFileManager> cfm = mockStatic(GroupsFileManager.class)){
+            cfm.when(() -> GroupsFileManager.updateGroup(Mockito.anyString(), Mockito.any(Group.class)))
+                    .then(invocation -> null);
 
-        assertThrows(AuthException.class, () -> contextData.getBookmarks(USER_RANDOM_NAME, GROUP_NAME),
-                "Should throw IllegalArgumentException with not registrated user");
-        resetMockedStatic(cfm);
+            assertThrows(AuthException.class, () -> contextData.getBookmarks(USER_RANDOM_NAME, GROUP_NAME),
+                    "Should throw IllegalArgumentException with not registrated user");
+        }
     }
 
     @Test
     void testGetBookmarksWithNotExistingGroup() {
-        MockedStatic<GroupsFileManager> cfm = mockStatic(GroupsFileManager.class);
-        cfm.when(() -> GroupsFileManager.updateGroup(Mockito.anyString(), Mockito.any(Group.class)))
-                .then(invocation -> null);
+        try(MockedStatic<GroupsFileManager> cfm = mockStatic(GroupsFileManager.class)){
+            cfm.when(() -> GroupsFileManager.updateGroup(Mockito.anyString(), Mockito.any(Group.class)))
+                    .then(invocation -> null);
 
-        contextData.cachedRegisteredUsers().put(USER_NAME, new User(USER_NAME, USER_HASH_PASS, USER_ID));
-        contextData.cachedBookmarkGroups().put(USER_NAME, new ArrayList<>());
+            contextData.cachedRegisteredUsers().put(USER_NAME, new User(USER_NAME, USER_HASH_PASS, USER_ID));
+            contextData.cachedBookmarkGroups().put(USER_NAME, new ArrayList<>());
 
-        assertThrows(IllegalArgumentException.class, () -> contextData.getBookmarks(USER_NAME, GROUP_NAME),
-                "Should throw IllegalArgumentException with not existing group");
-        resetMockedStatic(cfm);
+            assertThrows(IllegalArgumentException.class, () -> contextData.getBookmarks(USER_NAME, GROUP_NAME),
+                    "Should throw IllegalArgumentException with not existing group");
+        }
     }
 
     @Test
     void testGetBookmarksWithCorrectData() {
-        MockedStatic<GroupsFileManager> cfm = mockStatic(GroupsFileManager.class);
-        cfm.when(() -> GroupsFileManager.updateGroup(Mockito.anyString(), Mockito.any(Group.class)))
-                .then(invocation -> null);
+        try(MockedStatic<GroupsFileManager> cfm = mockStatic(GroupsFileManager.class)){
+            cfm.when(() -> GroupsFileManager.updateGroup(Mockito.anyString(), Mockito.any(Group.class)))
+                    .then(invocation -> null);
 
-        List<Bookmark> bookmarks = List.of(new Bookmark("url", "title", List.of("tag")));
-        contextData.cachedBookmarkGroups().get(USER_NAME).get(0).addBookmark(bookmarks.get(0));
+            List<Bookmark> bookmarks = List.of(new Bookmark("url", "title", List.of("tag")));
+            contextData.cachedBookmarkGroups().get(USER_NAME).get(0).addBookmark(bookmarks.get(0));
 
-        assertEquals(bookmarks, contextData.getBookmarks(USER_NAME, GROUP_NAME),
-                "Should return the bookmarks from the group");
-        resetMockedStatic(cfm);
+            assertEquals(bookmarks, contextData.getBookmarks(USER_NAME, GROUP_NAME),
+                    "Should return the bookmarks from the group");
+        }
     }
 
     @Test
@@ -478,24 +464,23 @@ public class ContextDataTest {
 
     @Test
     void testGetBookmarksWithoutGroupWithNotRegistratedUser() {
-        MockedStatic<GroupsFileManager> cfm = mockStatic(GroupsFileManager.class);
-        cfm.when(() -> GroupsFileManager.updateGroups(Mockito.anyString(), Mockito.anyList()))
-                .then(invocation -> null);
+        try(MockedStatic<GroupsFileManager> cfm = mockStatic(GroupsFileManager.class)){
+            cfm.when(() -> GroupsFileManager.updateGroups(Mockito.anyString(), Mockito.anyList()))
+                    .then(invocation -> null);
 
-        assertThrows(AuthException.class, () -> contextData.getBookmarks(USER_RANDOM_NAME),
-                "Should throw IllegalArgumentException with not registrated user");
-        resetMockedStatic(cfm);
+            assertThrows(AuthException.class, () -> contextData.getBookmarks(USER_RANDOM_NAME),
+                    "Should throw IllegalArgumentException with not registrated user");
+        }
     }
 
     @Test
     void testGetBookmarksWithoutGroupWithCorrectData() {
-        MockedStatic<GroupsFileManager> cfm = mockStatic(GroupsFileManager.class);
-        cfm.when(() -> GroupsFileManager.updateGroup(Mockito.anyString(), Mockito.any(Group.class)))
-                .then(invocation -> null);
+        try(MockedStatic<GroupsFileManager> cfm = mockStatic(GroupsFileManager.class)){
+            cfm.when(() -> GroupsFileManager.updateGroup(Mockito.anyString(), Mockito.any(Group.class)))
+                    .then(invocation -> null);
 
-        assertEquals(new ArrayList<>(), contextData.getBookmarks(USER_NAME, GROUP_NAME),
-                "Should return an empty list");
-        resetMockedStatic(cfm);
+            assertEquals(new ArrayList<>(), contextData.getBookmarks(USER_NAME, GROUP_NAME),"Should return an empty list");
+        }
     }
 
     @Test
@@ -508,27 +493,27 @@ public class ContextDataTest {
 
     @Test
     void testSearchByTagWithNotRegistratedUser() {
-        MockedStatic<GroupsFileManager> cfm = mockStatic(GroupsFileManager.class);
-        cfm.when(() -> GroupsFileManager.updateGroups(Mockito.anyString(), Mockito.anyList()))
-                .then(invocation -> null);
+        try(MockedStatic<GroupsFileManager> cfm = mockStatic(GroupsFileManager.class)){
+            cfm.when(() -> GroupsFileManager.updateGroups(Mockito.anyString(), Mockito.anyList()))
+                    .then(invocation -> null);
 
-        assertThrows(AuthException.class, () -> contextData.searchByTag(USER_RANDOM_NAME, List.of("tag")),
-                "Should throw IllegalArgumentException with not registrated user");
-        resetMockedStatic(cfm);
+            assertThrows(AuthException.class, () -> contextData.searchByTag(USER_RANDOM_NAME, List.of("tag")),
+                    "Should throw IllegalArgumentException with not registrated user");
+        }
     }
 
     @Test
     void testSearchByTagWithCorrectData() {
-        MockedStatic<GroupsFileManager> cfm = mockStatic(GroupsFileManager.class);
-        cfm.when(() -> GroupsFileManager.updateGroup(Mockito.anyString(), Mockito.any(Group.class)))
-                .then(invocation -> null);
+        try(MockedStatic<GroupsFileManager> cfm = mockStatic(GroupsFileManager.class)){
+            cfm.when(() -> GroupsFileManager.updateGroup(Mockito.anyString(), Mockito.any(Group.class)))
+                    .then(invocation -> null);
 
-        List<Bookmark> bookmarks = List.of(new Bookmark("url", "title", List.of("tag")));
-        contextData.cachedBookmarkGroups().get(USER_NAME).get(0).addBookmark(bookmarks.get(0));
+            List<Bookmark> bookmarks = List.of(new Bookmark("url", "title", List.of("tag")));
+            contextData.cachedBookmarkGroups().get(USER_NAME).get(0).addBookmark(bookmarks.get(0));
 
-        assertEquals(bookmarks, contextData.searchByTag(USER_NAME, List.of("tag")),
-                "Should return the bookmarks with the given tag");
-        resetMockedStatic(cfm);
+            assertEquals(bookmarks, contextData.searchByTag(USER_NAME, List.of("tag")),
+                    "Should return the bookmarks with the given tag");
+        }
     }
 
     @Test
@@ -549,13 +534,13 @@ public class ContextDataTest {
 
     @Test
     void testSearchByTitleWithCorrectData() {
-        MockedStatic<GroupsFileManager> cfm = mockStatic(GroupsFileManager.class);
-        cfm.when(() -> GroupsFileManager.updateGroup(Mockito.anyString(), Mockito.any(Group.class)))
-                .then(invocation -> null);
+        try(MockedStatic<GroupsFileManager> cfm = mockStatic(GroupsFileManager.class)){
+            cfm.when(() -> GroupsFileManager.updateGroup(Mockito.anyString(), Mockito.any(Group.class)))
+                    .then(invocation -> null);
 
-        assertEquals(new ArrayList<>(), contextData.searchByTitle(USER_NAME, "title"),
-                "Should return the bookmarks with the given title");
-        resetMockedStatic(cfm);
+            assertEquals(new ArrayList<>(), contextData.searchByTitle(USER_NAME, "title"),
+                    "Should return the bookmarks with the given title");
+        }
     }
 
     @Test
@@ -566,23 +551,23 @@ public class ContextDataTest {
 
     @Test
     void testCleanUpWithNotRegistratedUser() {
-        MockedStatic<GroupsFileManager> cfm = mockStatic(GroupsFileManager.class);
-        cfm.when(() -> GroupsFileManager.updateGroups(Mockito.anyString(), Mockito.anyList()))
-                .then(invocation -> null);
+        try(MockedStatic<GroupsFileManager> cfm = mockStatic(GroupsFileManager.class)){
+            cfm.when(() -> GroupsFileManager.updateGroups(Mockito.anyString(), Mockito.anyList()))
+                    .then(invocation -> null);
 
-        assertThrows(AuthException.class, () -> contextData.cleanUp(USER_RANDOM_NAME),
-                "Should throw IllegalArgumentException with not registrated user");
-        resetMockedStatic(cfm);
+            assertThrows(AuthException.class, () -> contextData.cleanUp(USER_RANDOM_NAME),
+                    "Should throw IllegalArgumentException with not registrated user");
+        }
     }
 
     @Test
     void testCleanUpWithCorrectData() {
-        MockedStatic<GroupsFileManager> cfm = mockStatic(GroupsFileManager.class);
-        cfm.when(() -> GroupsFileManager.updateGroups(Mockito.anyString(), Mockito.anyList()))
-                .then(invocation -> null);
+        try(MockedStatic<GroupsFileManager> cfm = mockStatic(GroupsFileManager.class)){
+            cfm.when(() -> GroupsFileManager.updateGroups(Mockito.anyString(), Mockito.anyList()))
+                    .then(invocation -> null);
 
-        contextData.cleanUp(USER_NAME);
-        resetMockedStatic(cfm);
+            assertDoesNotThrow(() -> contextData.cleanUp(USER_NAME));
+        }
     }
 
     @Test
@@ -595,13 +580,13 @@ public class ContextDataTest {
 
     @Test
     void testImportFromChromeWithNotRegistratedUser() {
-        MockedStatic<GroupsFileManager> cfm = mockStatic(GroupsFileManager.class);
-        cfm.when(() -> GroupsFileManager.updateGroups(Mockito.anyString(), Mockito.anyList()))
-                .then(invocation -> null);
+        try(MockedStatic<GroupsFileManager> cfm = mockStatic(GroupsFileManager.class)){
+            cfm.when(() -> GroupsFileManager.updateGroups(Mockito.anyString(), Mockito.anyList()))
+                    .then(invocation -> null);
 
-        assertThrows(AuthException.class, () -> contextData.importFromChrome(USER_RANDOM_NAME),
-                "Should throw IllegalArgumentException with not registrated user");
-        resetMockedStatic(cfm);
+            assertThrows(AuthException.class, () -> contextData.importFromChrome(USER_RANDOM_NAME),
+                    "Should throw IllegalArgumentException with not registrated user");
+        }
     }
 
 }

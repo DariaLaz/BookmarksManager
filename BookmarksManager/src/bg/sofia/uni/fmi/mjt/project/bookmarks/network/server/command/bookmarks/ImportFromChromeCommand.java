@@ -6,6 +6,13 @@ import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.handlers.sessions.S
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.helpers.messages.Messages;
 
 public class ImportFromChromeCommand extends BookmarkCommand {
+    private static final int MAX_ARGUMENTS_COUNT = 0;
+
+    public void validateArguments() {
+        if (getArguments().length != MAX_ARGUMENTS_COUNT) {
+            throw new IllegalArgumentException(Messages.INVALID_ARGUMENTS);
+        }
+    }
 
     public ImportFromChromeCommand(CommandType command, String[] arguments, String sessionId) {
         super(command, arguments, sessionId);

@@ -10,7 +10,7 @@ import java.nio.file.Paths;
 public class FileManager implements FileHandler  {
     private static final Gson GSON = new Gson();
 
-    public static synchronized void create(String pathStr) {
+    public static void create(String pathStr) {
         try {
             Path path = Paths.get(pathStr);
             Files.createFile(path);

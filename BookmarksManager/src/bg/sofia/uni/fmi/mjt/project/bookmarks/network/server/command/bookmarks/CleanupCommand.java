@@ -6,12 +6,20 @@ import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.handlers.sessions.S
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.helpers.messages.Messages;
 
 public class CleanupCommand extends BookmarkCommand {
+    private static final int MAX_ARGUMENTS_COUNT = 0;
     public CleanupCommand(CommandType command, String[] arguments, String sessionId) {
         super(command, arguments, sessionId);
     }
 
+    public void validateArguments() {
+        if (getArguments().length != MAX_ARGUMENTS_COUNT) {
+            throw new IllegalArgumentException(Messages.INVALID_ARGUMENTS);
+        }
+    }
+
     @Override
     public Response execute() {
+        validateArguments();
         try {
             String username = SessionManager.getUsername(getSessionId());
             if (BOOKMARK_HANDLER.cleanUp(username)) {

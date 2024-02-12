@@ -5,6 +5,13 @@ import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.command.CommandType
 import bg.sofia.uni.fmi.mjt.project.bookmarks.network.server.helpers.messages.Messages;
 
 public class RemoveBookmarkCommand extends BookmarkCommand  {
+    private static final int REQUIRED_NUMBER_OF_ARGUMENTS = 2;
+    public void validateArguments() {
+        if (getArguments().length != REQUIRED_NUMBER_OF_ARGUMENTS) {
+            throw new IllegalArgumentException(Messages.INVALID_ARGUMENTS);
+        }
+    }
+
     public RemoveBookmarkCommand(CommandType command, String[] arguments, String sessionId) {
         super(command, arguments, sessionId);
     }
@@ -31,9 +38,10 @@ public class RemoveBookmarkCommand extends BookmarkCommand  {
 
     @Override
     public Response execute() {
+        validateArguments();
         try {
             if (BOOKMARK_HANDLER.removeBookmark(getSessionId(), getGroupName(), getBookmarkUrl())) {
-                return new Response(Messages.SUCCESSFUL_REMOVE_BOOKMARK, true, null, getCommand());
+                return new Response(Messages.SUCCESSFUL_REMOVE_BOOKMARK, true, getSessionId(), getCommand());
             }
         } catch (Exception e) {
             LOGGER.log(e);

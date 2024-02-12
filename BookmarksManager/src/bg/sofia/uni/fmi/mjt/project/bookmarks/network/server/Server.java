@@ -17,7 +17,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 
 public class Server {
-    private static final int BUFFER_SIZE = 10000;
+    private static final int BUFFER_SIZE = 16384;
     private static final String HOST = "localhost";
     private final int port;
     private boolean isRunning = true;
